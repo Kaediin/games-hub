@@ -1,0 +1,22 @@
+export const games = [
+  {
+    id: "codenames",
+    title: "Codenames",
+    blurb: "Two teams. One grid. No talking.",
+    players: "4–8+",
+    href: "./codenames/",
+    status: "live",
+    accent: "#c45c4a",
+    soonNote: "",
+  },
+  {
+    id: "thirty-seconds",
+    title: "30 Seconds",
+    blurb: "Race the board. Name five things. Pass the wine.",
+    players: "4–12",
+    href: "./thirty-seconds/",
+    status: "live",
+    accent: "#4a8b7a",
+    soonNote: "",
+  },
+];

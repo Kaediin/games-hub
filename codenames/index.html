@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a1a1a" />
+    <title>Codenames</title>
+    <meta
+      name="description"
+      content="A free, browser-based version of the Codenames party game. Two teams, one grid, no backend."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="#home" class="brand" aria-label="Codenames home">
+        <span class="brand-mark" aria-hidden="true">CN</span>
+        <span class="brand-text">Codenames</span>
+      </a>
+      <nav class="header-actions" aria-label="App controls">
+        <div
+          id="timer-chip"
+          class="timer-chip hidden"
+          role="status"
+          aria-live="polite"
+        ></div>
+        <button
+          id="btn-sound"
+          class="icon-btn"
+          type="button"
+          aria-label="Toggle sound"
+          aria-pressed="false"
+          title="Toggle sound"
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              class="ico-sound-on"
+              fill="currentColor"
+              d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+            />
+            <path
+              class="ico-sound-off hidden"
+              fill="currentColor"
+              d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.17v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z"
+            />
+          </svg>
+        </button>
+        <button
+          id="btn-theme"
+          class="icon-btn"
+          type="button"
+          aria-label="Toggle theme"
+          title="Toggle theme"
+        >
+          <svg
+            class="ico-theme-light"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 17a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l1.42 1.42A1 1 0 1 1 5.64 7.06L4.22 5.64a1 1 0 0 1 0-1.42zm12.72 12.72a1 1 0 0 1 1.42 0l1.42 1.42a1 1 0 1 1-1.42 1.42l-1.42-1.42a1 1 0 0 1 0-1.42zM2 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1zm17 0a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1zM4.22 19.78a1 1 0 0 1 0-1.42l1.42-1.42a1 1 0 1 1 1.42 1.42l-1.42 1.42a1 1 0 0 1-1.42 0zm12.72-12.72a1 1 0 0 1 0-1.42l1.42-1.42a1 1 0 0 1 1.42 1.42l-1.42 1.42a1 1 0 0 1-1.42 0z"
+            />
+          </svg>
+          <svg
+            class="ico-theme-dark hidden"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"
+            />
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main id="view" class="view" aria-live="polite"></main>
+
+    <!-- View templates -->
+    <template id="tpl-home">
+      <section class="home">
+        <div class="hero">
+          <p class="eyebrow">Spy agency · word duel</p>
+          <h1 class="hero-title">Codenames</h1>
+          <p class="hero-tagline">
+            Two teams. One grid of words. The right clue wins it all.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-action="new-game">
+              New game
+            </button>
+            <button
+              class="btn btn-secondary hidden"
+              data-action="resume-game"
+            >
+              Resume game
+            </button>
+            <button class="btn btn-ghost" data-action="history">
+              Game history
+            </button>
+          </div>
+        </div>
+
+        <section class="card">
+          <h2>What is Codenames?</h2>
+          <p>
+            Codenames is a party word game for two teams. Each team has a
+            <strong>spymaster</strong> who knows the secret identity of 25
+            words on the board, and tries to guide their teammates (the
+            <strong>operatives</strong>) to find their team's words first —
+            using only one-word clues.
+          </p>
+        </section>
+
+        <section class="card">
+          <h2>How to play</h2>
+          <ol class="how-list">
+            <li>
+              Split into two teams (Red and Blue). Each team picks one
+              <strong>spymaster</strong>; the rest are
+              <strong>operatives</strong>.
+            </li>
+            <li>
+              The board (this device — ideally an iPad) shows a 5x5 grid of
+              words. Each spymaster scans the one-time
+              <strong>QR code</strong> with their phone to see the secret
+              colour key. Operatives never see the key.
+            </li>
+            <li>
+              On each turn, the active spymaster gives a
+              <strong>one-word clue</strong> followed by a
+              <strong>number</strong> (e.g. "Ocean — 3"), hinting at that
+              many of their team's words. Spymasters do not touch the board.
+            </li>
+            <li>
+              Operatives discuss and tap tiles to guess. Tapping one of your
+              own words lets you keep going. Tapping a neutral word or the
+              other team's word ends your turn. Tapping the
+              <strong>assassin</strong> instantly loses the game for your
+              team.
+            </li>
+            <li>
+              First team to find all of their words wins. Good luck, agent.
+            </li>
+          </ol>
+        </section>
+
+        <section class="card">
+          <h2>How it works · your data</h2>
+          <p>
+            Everything runs in your browser. There is
+            <strong>no backend</strong>, no account, no tracking, no
+            analytics. Player names, the current game and your match history
+            are saved only in this browser's
+            <strong>local&nbsp;storage</strong>. Clearing your browser data
+            wipes everything.
+          </p>
+          <p>
+            The QR code is generated locally on this device and shared
+            directly between your devices. Once each spymaster has scanned
+            it, no further communication happens between the phones and the
+            board.
+          </p>
+        </section>
+
+        <section class="card">
+          <h2>Tips</h2>
+          <ul class="tip-list">
+            <li>Best with at least 4 players (2 vs 2).</li>
+            <li>Use a tablet or laptop for the board so everyone can see.</li>
+            <li>Each spymaster needs their own phone for the key.</li>
+            <li>Refresh-safe: the game survives reloads.</li>
+          </ul>
+        </section>
+
+        <footer class="home-footer">
+          <p>
+            Inspired by
+            <a
+              href="https://czechgames.com/en/codenames/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Codenames by Vlaada Chvátil / Czech Games Edition</a
+            >. This is an unofficial fan-made web version.
+          </p>
+          <button class="btn btn-danger-ghost" data-action="reset-data">
+            Reset all data
+          </button>
+        </footer>
+      </section>
+    </template>
+
+    <template id="tpl-setup">
+      <section class="setup">
+        <a href="#home" class="back-link">← Back</a>
+        <h1>Players</h1>
+        <p class="muted">
+          Add everyone who's playing. You'll split them into teams next.
+        </p>
+        <form id="add-player-form" class="player-form">
+          <input
+            id="player-name-input"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            placeholder="Player name"
+            maxlength="24"
+            required
+          />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <ul id="player-list" class="player-list"></ul>
+        <div class="setup-actions">
+          <button id="to-assign" class="btn btn-primary" disabled>
+            Continue → Assign teams
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-assign">
+      <section class="assign">
+        <a href="#setup" class="back-link">← Players</a>
+        <h1>Assign teams</h1>
+        <p class="muted">
+          For each player, tap <strong>Red</strong> or <strong>Blue</strong>
+          to assign their team. Then tap the ★ on one player per team to
+          mark them as the spymaster.
+        </p>
+        <div class="assign-controls">
+          <button id="randomize-teams" class="btn btn-secondary">
+            Randomise teams
+          </button>
+          <button id="clear-teams" class="btn btn-ghost">Clear</button>
+        </div>
+
+        <div id="assign-summary" class="assign-summary" aria-live="polite"></div>
+        <ul id="assign-roster" class="assign-roster"></ul>
+
+        <div class="setup-actions">
+          <button id="start-game" class="btn btn-primary" disabled>
+            Start game →
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-qr">
+      <section class="qr-view">
+        <a href="#assign" class="back-link">← Teams</a>
+        <h1>Pass the key to the spymasters</h1>
+        <p class="muted">
+          Each spymaster scans this QR code with their phone to see the
+          secret colour key. Operatives — look away!
+        </p>
+        <div id="qr-target" class="qr-target" aria-label="Spymaster key QR"></div>
+        <p class="qr-url">
+          Or open this link on your phone:
+          <a id="qr-link" href="#" target="_blank" rel="noopener"></a>
+        </p>
+        <div class="setup-actions">
+          <button id="to-play" class="btn btn-primary">
+            Everyone ready → Start playing
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-play">
+      <section class="play">
+        <header class="scoreboard">
+          <div class="score score-red" data-team="red">
+            <span class="score-label">Red</span>
+            <span class="score-num" id="score-red">0</span>
+            <span class="score-spymaster" id="spymaster-red"></span>
+          </div>
+          <div class="turn-indicator" id="turn-indicator">
+            <span class="turn-label">Turn</span>
+            <span class="turn-team">—</span>
+          </div>
+          <div class="score score-blue" data-team="blue">
+            <span class="score-label">Blue</span>
+            <span class="score-num" id="score-blue">0</span>
+            <span class="score-spymaster" id="spymaster-blue"></span>
+          </div>
+        </header>
+        <div id="board" class="board"></div>
+        <footer class="play-actions">
+          <button id="btn-end-turn" class="btn btn-secondary">End turn</button>
+          <button id="btn-timer" class="btn btn-ghost">Timer…</button>
+          <button id="btn-info" class="btn btn-ghost">QR &amp; teams</button>
+          <button id="btn-quit" class="btn btn-danger-ghost">Quit game</button>
+        </footer>
+      </section>
+    </template>
+
+    <template id="tpl-history">
+      <section class="history">
+        <a href="#home" class="back-link">← Home</a>
+        <h1>Game history</h1>
+        <ul id="history-list" class="history-list"></ul>
+        <p id="history-empty" class="muted hidden">
+          No games played yet. Win one and it'll show up here.
+        </p>
+        <div class="setup-actions">
+          <button id="clear-history" class="btn btn-danger-ghost">
+            Clear history
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-key">
+      <section class="key-view">
+        <header class="key-header">
+          <h1>Spymaster key</h1>
+          <p class="muted">
+            Keep this screen private. Glance at the tablet to see which tiles
+            have been flipped.
+          </p>
+          <div
+            class="focus-toggle"
+            role="group"
+            aria-label="Highlight your team"
+          >
+            <span class="focus-label">I am:</span>
+            <button type="button" data-focus="both" aria-pressed="true">
+              Both
+            </button>
+            <button type="button" data-focus="red" aria-pressed="false">
+              Red
+            </button>
+            <button type="button" data-focus="blue" aria-pressed="false">
+              Blue
+            </button>
+          </div>
+        </header>
+        <div id="key-board" class="key-board"></div>
+      </section>
+    </template>
+
+    <template id="tpl-end">
+      <section class="end-view">
+        <h1 id="end-title">Game over</h1>
+        <p id="end-detail" class="muted"></p>
+        <div class="end-scores">
+          <div class="score score-red"><span>Red</span><b id="end-red">0</b></div>
+          <div class="score score-blue"><span>Blue</span><b id="end-blue">0</b></div>
+        </div>
+        <div id="end-board" class="end-board"></div>
+        <div class="setup-actions">
+          <button class="btn btn-primary" data-action="new-game">Play again</button>
+          <button class="btn btn-ghost" data-action="home">Back to home</button>
+        </div>
+      </section>
+    </template>
+
+    <!-- Timer popover -->
+    <div id="timer-popover" class="popover hidden" role="dialog" aria-label="Set timer">
+      <!-- State 1: no timer running — pick a duration -->
+      <div data-timer-state="pick">
+        <h3>Start a timer</h3>
+        <div class="timer-grid">
+          <button data-secs="30">30s</button>
+          <button data-secs="60">1m</button>
+          <button data-secs="90">1m 30s</button>
+          <button data-secs="120">2m</button>
+          <button data-secs="180">3m</button>
+          <button data-action="custom">Custom…</button>
+        </div>
+        <div class="timer-actions">
+          <button class="btn btn-ghost" data-action="close-timer">Close</button>
+        </div>
+      </div>
+      <!-- State 2: timer running or paused — manage it -->
+      <div data-timer-state="running" class="hidden">
+        <h3>Timer running</h3>
+        <p id="timer-popover-status" class="timer-popover-status"></p>
+        <div class="timer-actions timer-actions-grid">
+          <button class="btn btn-secondary" data-action="pause-timer">Pause</button>
+          <button class="btn btn-secondary" data-action="restart-timer">Restart</button>
+          <button class="btn btn-danger-ghost" data-action="stop-timer">Stop timer</button>
+          <button class="btn btn-ghost" data-action="close-timer">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="info-modal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="info-modal-title"
+    >
+      <div class="modal">
+        <header class="modal-header">
+          <h2 id="info-modal-title">Spymaster QR &amp; teams</h2>
+          <button
+            type="button"
+            class="icon-btn modal-close"
+            aria-label="Close"
+            data-action="close-info"
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41L10.59 13.42 4.29 19.71l1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.29-6.29 6.3-6.3z"
+              />
+            </svg>
+          </button>
+        </header>
+        <div class="modal-body">
+          <div id="info-qr" class="info-qr"></div>
+          <p class="info-qr-hint muted">
+            Scan again with a phone if a spymaster lost their key view.
+          </p>
+          <a
+            id="info-qr-link"
+            class="info-qr-link"
+            href="#"
+            target="_blank"
+            rel="noopener"
+          ></a>
+          <div class="info-teams">
+            <section class="info-team" data-team="red">
+              <h3>Red</h3>
+              <ul id="info-red"></ul>
+            </section>
+            <section class="info-team" data-team="blue">
+              <h3>Blue</h3>
+              <ul id="info-blue"></ul>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="vendor/qrcode.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

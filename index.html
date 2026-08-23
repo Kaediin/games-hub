@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a1410" />
+    <meta name="color-scheme" content="dark" />
+    <title>Playground — pick a game</title>
+    <meta
+      name="description"
+      content="A cozy arcade hub for game night. Pick Codenames, 30 Seconds, and whatever comes next."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/hub.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="atmosphere-glow"></div>
+      <div class="atmosphere-grain"></div>
+    </div>
+
+    <header class="masthead">
+      <div class="marquee" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span>
+      </div>
+      <p class="eyebrow">Game night</p>
+      <h1 class="wordmark">Playground</h1>
+      <p class="tagline">pick a game, pass the tablet</p>
+    </header>
+
+    <main class="stage">
+      <h2 class="visually-hidden">Games</h2>
+      <div id="game-grid" class="game-grid"></div>
+    </main>
+
+    <footer class="colophon">
+      <p>Made for game nights. More cabinets later.</p>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="js/hub.js"></script>
+  </body>
+</html>
