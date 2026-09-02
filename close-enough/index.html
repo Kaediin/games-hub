@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#e4572e" />
+    <title>Close Enough</title>
+    <meta
+      name="description"
+      content="Pass-the-phone party game. Guess the number. Closest wins. Furthest drinks."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="#home" class="brand" aria-label="Close Enough home">
+        <span class="brand-mark" aria-hidden="true">CE</span>
+        <span class="brand-text">Close Enough</span>
+      </a>
+      <nav class="header-actions" aria-label="App controls">
+        <button
+          id="btn-theme"
+          class="icon-btn"
+          type="button"
+          aria-label="Toggle theme"
+          title="Toggle theme"
+        >
+          <svg
+            class="ico-theme-light"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 17a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l1.42 1.42A1 1 0 1 1 5.64 7.06L4.22 5.64a1 1 0 0 1 0-1.42zm12.72 12.72a1 1 0 0 1 1.42 0l1.42 1.42a1 1 0 1 1-1.42 1.42l-1.42-1.42a1 1 0 0 1 0-1.42zM2 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1zm17 0a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1zM4.22 19.78a1 1 0 0 1 0-1.42l1.42-1.42a1 1 0 1 1 1.42 1.42l-1.42 1.42a1 1 0 0 1-1.42 0zm12.72-12.72a1 1 0 0 1 0-1.42l1.42-1.42a1 1 0 0 1 1.42 1.42l-1.42 1.42a1 1 0 0 1-1.42 0z"
+            />
+          </svg>
+          <svg
+            class="ico-theme-dark hidden"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"
+            />
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main id="view" class="view" aria-live="polite"></main>
+
+    <template id="tpl-home">
+      <section class="home">
+        <div class="hero">
+          <p class="eyebrow">Pass the phone · party classic</p>
+          <h1 class="hero-title">Close Enough</h1>
+          <p class="hero-tagline">
+            Guess the number. Closest wins. Furthest drinks.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-action="new-game">New game</button>
+            <button class="btn btn-secondary hidden" data-action="resume-game">
+              Resume game
+            </button>
+            <button class="btn btn-ghost" data-action="history">Game history</button>
+          </div>
+        </div>
+
+        <section class="card">
+          <h2>What is Close Enough?</h2>
+          <p>
+            Grab a random object — a remote, a bottle, a candle — and guess how
+            much it weighs, costs, or measures. Pass this phone around so
+            guesses stay secret. Closest wins the round. Furthest takes the
+            punishment. Play as many rounds as you like.
+          </p>
+        </section>
+
+        <section class="card">
+          <h2>How to play</h2>
+          <ol class="how-list">
+            <li>
+              Add everyone who is playing. One shared phone is enough — an
+              iPhone or iPad is perfect.
+            </li>
+            <li>
+              Name the object and an optional unit (default
+              <strong>grams</strong>). Then pass the phone. Each person locks in
+              a number without showing the others.
+            </li>
+            <li>
+              Weigh it, measure it, look it up. Enter the actual value and tap
+              <strong>Reveal</strong>.
+            </li>
+            <li>
+              See who was closest and who was furthest. Then check the
+              <strong>podium</strong> — lowest average miss over the night wins.
+            </li>
+            <li>
+              Tap <strong>Next round</strong> and pick another object. Stop
+              whenever the table is done.
+            </li>
+          </ol>
+        </section>
+
+        <section class="card">
+          <h2>How scoring works</h2>
+          <p>
+            There is no exact right answer. You are scored on
+            <strong>how far off</strong> you were — like GeoGuessr, but with a
+            number instead of a map.
+          </p>
+          <p>
+            Each round:
+            <strong>distance = |your guess − the real value|</strong>. Closest
+            wins the round. Furthest takes the punishment. If you skip, that
+            round does not count for you.
+          </p>
+          <p>
+            The <strong>podium</strong> is who has the
+            <strong>lowest average miss</strong> over the rounds they played.
+            Winning one round is nice; staying consistently close wins the night.
+          </p>
+          <div class="example">
+            <h3>Example — TV Remote, actually 438 grams</h3>
+            <ul class="tip-list">
+              <li>Alice guessed 450 → <strong>12</strong> off</li>
+              <li>Bob guessed 440 → <strong>2</strong> off — closest, wins the round</li>
+              <li>Charlie guessed 500 → <strong>62</strong> off — furthest</li>
+              <li>David skipped → nothing on his record</li>
+            </ul>
+            <p>
+              Next round Alice is 8 off and Bob is 20 off. Averages: Alice
+              <strong>10</strong>, Bob <strong>11</strong>. Alice is ahead on
+              the podium even though Bob won the first round.
+            </p>
+            <p class="muted">
+              Skipped rounds never count as zero. Lower average is better.
+            </p>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>How it works · your data</h2>
+          <p>
+            Everything runs in your browser. There is
+            <strong>no backend</strong>, no account, no tracking. Player names,
+            the current game and history stay in this browser’s
+            <strong>local&nbsp;storage</strong>. Clearing browser data wipes
+            everything.
+          </p>
+        </section>
+
+        <footer class="home-footer">
+          <p>Made for game nights. Pass the phone, not the answers.</p>
+          <button class="btn btn-danger-ghost" data-action="reset-data">
+            Reset all data
+          </button>
+        </footer>
+      </section>
+    </template>
+
+    <template id="tpl-setup">
+      <section class="setup">
+        <a href="#home" class="back-link">← Back</a>
+        <h1>Who’s playing?</h1>
+        <p class="muted">Names must be unique. You can add people later too.</p>
+
+        <ul id="player-list" class="player-list"></ul>
+
+        <div class="add-row">
+          <label class="field-label" for="player-name">Display name</label>
+          <input
+            id="player-name"
+            class="text-input"
+            type="text"
+            maxlength="24"
+            autocomplete="off"
+            autocapitalize="words"
+            placeholder="Alice"
+          />
+          <button id="add-player" class="btn btn-secondary" type="button">
+            Add player
+          </button>
+        </div>
+
+        <div class="setup-actions">
+          <button id="reset-setup" class="btn btn-ghost" type="button">
+            Clear names
+          </button>
+          <button id="start-game" class="btn btn-primary" type="button">
+            To the lobby →
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-lobby">
+      <section class="lobby">
+        <p class="eyebrow" id="lobby-count">Players</p>
+        <h1>Lobby</h1>
+        <p id="lobby-wait" class="muted">Waiting for the game to start...</p>
+        <ul id="lobby-players" class="player-list"></ul>
+
+        <div class="add-row late-join">
+          <label class="field-label" for="late-name">Late joiner</label>
+          <input
+            id="late-name"
+            class="text-input"
+            type="text"
+            maxlength="24"
+            autocomplete="off"
+            autocapitalize="words"
+            placeholder="Another name"
+          />
+          <button id="late-add" class="btn btn-secondary" type="button">Add</button>
+        </div>
+
+        <div id="lobby-board" class="lobby-board"></div>
+
+        <h2 class="section-label">Past rounds</h2>
+        <ul id="lobby-rounds" class="history-rounds-live"></ul>
+
+        <div class="setup-actions">
+          <button id="end-game" class="btn btn-danger-ghost" type="button">
+            End game
+          </button>
+          <button id="start-round" class="btn btn-primary" type="button">
+            Start round
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-round">
+      <section class="round">
+        <p class="eyebrow" id="round-kicker">Round</p>
+
+        <div id="phase-naming" class="phase">
+          <h1>Name the object</h1>
+          <p class="muted">What are we guessing?</p>
+          <label class="field-label" for="object-name">Object</label>
+          <input
+            id="object-name"
+            class="text-input"
+            type="text"
+            maxlength="48"
+            autocomplete="off"
+            placeholder="TV Remote"
+          />
+          <label class="field-label" for="object-unit">Unit (optional)</label>
+          <input
+            id="object-unit"
+            class="text-input"
+            type="text"
+            maxlength="24"
+            autocomplete="off"
+            placeholder="grams"
+          />
+          <div class="setup-actions">
+            <button id="lock-object" class="btn btn-primary" type="button">
+              Start guessing
+            </button>
+          </div>
+        </div>
+
+        <div id="phase-cover" class="phase cover-phase hidden" hidden>
+          <div class="cover-card">
+            <p class="eyebrow">Don’t peek</p>
+            <h1>
+              Hand the phone to
+              <span id="cover-name">Alice</span>
+            </h1>
+            <p id="cover-progress" class="progress-line">0 / 0 guesses submitted</p>
+            <ul id="submitted-list" class="submitted-list"></ul>
+            <button id="cover-ready" class="btn btn-primary btn-go" type="button">
+              I’m ready
+            </button>
+            <div class="cover-alt">
+              <button id="cover-skip" class="btn btn-ghost" type="button">
+                Skip this player
+              </button>
+              <button id="cover-skip-rest" class="btn btn-secondary" type="button">
+                Enter actual value
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="phase-guess" class="phase hidden" hidden>
+          <p class="eyebrow" id="guess-who">Alice</p>
+          <h1 id="guess-prompt">What’s your guess?</h1>
+          <p class="object-line">
+            <strong id="guess-object">Object</strong>
+            <span id="guess-unit" class="unit-pill"></span>
+          </p>
+          <label class="field-label visually-hidden" for="guess-input">Your guess</label>
+          <input
+            id="guess-input"
+            class="guess-input"
+            type="text"
+            inputmode="decimal"
+            enterkeyhint="done"
+            autocomplete="off"
+            placeholder="0"
+          />
+          <p class="muted locked-hint">Guess locked 🔒 after you confirm.</p>
+          <div class="setup-actions">
+            <button id="guess-back" class="btn btn-ghost" type="button">
+              Not me
+            </button>
+            <button id="guess-lock" class="btn btn-primary" type="button">
+              Lock in
+            </button>
+          </div>
+        </div>
+
+        <div id="phase-actual" class="phase hidden" hidden>
+          <h1>The actual value</h1>
+          <p class="object-line">
+            <strong id="actual-object">Object</strong>
+            <span id="actual-unit" class="unit-pill"></span>
+          </p>
+          <p id="actual-progress" class="progress-line"></p>
+          <ul id="actual-submitted" class="submitted-list"></ul>
+          <label class="field-label" for="actual-input">Measured value</label>
+          <input
+            id="actual-input"
+            class="guess-input"
+            type="text"
+            inputmode="decimal"
+            enterkeyhint="done"
+            autocomplete="off"
+            placeholder="438"
+          />
+          <p class="muted">This is not a guess — it’s the real number.</p>
+          <div class="setup-actions">
+            <button id="btn-reveal" class="btn btn-primary btn-go" type="button">
+              Reveal
+            </button>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-reveal">
+      <section class="reveal">
+        <p class="eyebrow">THE ANSWER IS...</p>
+        <h1 id="reveal-answer" class="answer-hero">0</h1>
+        <p id="reveal-object" class="muted"></p>
+        <ul id="reveal-standings" class="reveal-standings"></ul>
+        <div id="reveal-podium" class="reveal-podium"></div>
+        <h2 class="section-label">Round history</h2>
+        <ul id="reveal-history" class="history-rounds-live"></ul>
+        <div class="setup-actions">
+          <button id="end-game" class="btn btn-danger-ghost" type="button">
+            End game
+          </button>
+          <button id="back-lobby" class="btn btn-ghost" type="button">Lobby</button>
+          <button id="next-round" class="btn btn-primary" type="button">
+            Next round
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-history">
+      <section class="history">
+        <a href="#home" class="back-link">← Home</a>
+        <h1>Game history</h1>
+        <ul id="history-list" class="history-list"></ul>
+        <p id="history-empty" class="muted hidden">
+          No games finished yet. Crown a podium and it’ll show up here.
+        </p>
+        <div class="setup-actions">
+          <button id="clear-history" class="btn btn-danger-ghost">Clear history</button>
+        </div>
+      </section>
+    </template>
+
+    <template id="tpl-end">
+      <section class="end-view">
+        <p class="eyebrow">Game over</p>
+        <h1 id="end-title">That’s a wrap</h1>
+        <p id="end-detail" class="muted"></p>
+        <div id="end-board"></div>
+        <h2 class="section-label">Rounds</h2>
+        <ul id="end-rounds" class="history-rounds-live"></ul>
+        <div class="setup-actions">
+          <button class="btn btn-primary" data-action="new-game">Play again</button>
+          <button class="btn btn-ghost" data-action="home">Back to home</button>
+        </div>
+      </section>
+    </template>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

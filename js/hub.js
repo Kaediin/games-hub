@@ -7,6 +7,7 @@ let toastTimer = 0;
 function artFor(game) {
   if (game.id === "codenames") return codenamesArt();
   if (game.id === "thirty-seconds") return thirtyArt();
+  if (game.id === "close-enough") return closeArt();
   return fallbackArt(game.accent);
 }
 
@@ -71,6 +72,19 @@ function thirtyArt() {
       <circle cx="182" cy="48" r="7" fill="#e8b86d"/>
       <circle cx="100" cy="62" r="26" fill="#14201b" stroke="#e8b86d" stroke-width="3"/>
       <text x="100" y="72" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-size="22" font-weight="700" fill="#f3ead8">30</text>
+    </svg>
+  `;
+}
+
+function closeArt() {
+  return `
+    <svg viewBox="0 0 200 125" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="200" height="125" fill="#1a2421"/>
+      <rect x="8" y="8" width="184" height="109" rx="10" fill="#121c1a"/>
+      <circle cx="100" cy="64" r="46" fill="none" stroke="#e4572e" stroke-width="7"/>
+      <circle cx="100" cy="64" r="30" fill="none" stroke="#e0b14a" stroke-width="7"/>
+      <circle cx="100" cy="64" r="14" fill="#1d9a7a"/>
+      <circle cx="118" cy="48" r="5" fill="#f3ead8"/>
     </svg>
   `;
 }

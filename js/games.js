@@ -19,4 +19,14 @@ export const games = [
     accent: "#4a8b7a",
     soonNote: "",
   },
+  {
+    id: "close-enough",
+    title: "Close Enough",
+    blurb: "Guess the number. Closest wins. Furthest drinks.",
+    players: "3–12",
+    href: "./close-enough/",
+    status: "live",
+    accent: "#e4572e",
+    soonNote: "",
+  },
 ];
