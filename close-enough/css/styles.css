@@ -470,6 +470,56 @@ body[data-route="history"] .view {
 .player-name {
   font-weight: 700;
 }
+.player-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pick-list {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+.pick-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.pick-player {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 12px 16px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+.pick-player:hover,
+.pick-player:focus-visible {
+  border-color: var(--coral);
+  outline: none;
+}
+.pick-row.is-done {
+  min-height: var(--tap);
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  justify-content: space-between;
+  opacity: 0.7;
+}
+.pick-row.is-in {
+  border-color: var(--teal);
+  color: var(--teal);
+  opacity: 1;
+}
 .player-meta,
 .chip-remove {
   color: var(--text-muted);

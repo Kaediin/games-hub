@@ -1,7 +1,7 @@
 import { template, el, toast, confirmAction } from "../ui.js";
 import { state } from "../state.js";
 import { navigate } from "../router.js";
-import { addPlayer, startRound, endGame, historyEntry } from "../game.js";
+import { addPlayer, removePlayer, startRound, endGame, historyEntry } from "../game.js";
 import { persist, resumeRoute } from "../play.js";
 import { boardFor, formatAvg, renderPodium, renderTable } from "../standings.js";
 
@@ -24,18 +24,49 @@ export function renderLobby(root) {
   if (game.rounds.length) waitEl.classList.add("hidden");
 
   const list = root.querySelector("#lobby-players");
+  const canRemove = game.players.length > 1;
   game.players.forEach((p) => {
     const row = boardFor(game).find((r) => r.id === p.id);
+    const meta = row?.roundsParticipated
+      ? `${formatAvg(row.averageDistance)} avg`
+      : "not played yet";
+    const actions = [
+      el("span", { class: "player-meta" }, meta),
+    ];
+    if (canRemove) {
+      actions.push(
+        el(
+          "button",
+          {
+            type: "button",
+            class: "chip-remove",
+            "aria-label": `Remove ${p.displayName}`,
+            onclick: () => {
+              if (
+                !confirmAction(
+                  `Remove ${p.displayName}? They won't play the next round. Past rounds stay in history.`
+                )
+              )
+                return;
+              const r = removePlayer(game, p.id);
+              if (!r.ok) {
+                toast(r.error);
+                return;
+              }
+              persist(game);
+              navigate("lobby");
+            },
+          },
+          "Remove"
+        )
+      );
+    }
     list.appendChild(
       el(
         "li",
         { class: "player-row" },
         el("span", { class: "player-name" }, p.displayName),
-        el(
-          "span",
-          { class: "player-meta" },
-          row?.roundsParticipated ? `${formatAvg(row.averageDistance)} avg` : "not played yet"
-        )
+        el("div", { class: "player-actions" }, ...actions)
       )
     );
   });

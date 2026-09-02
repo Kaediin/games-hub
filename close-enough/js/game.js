@@ -45,25 +45,31 @@ export function duplicateName(game, name, exceptId = null) {
   return game.players.some((p) => p.id !== exceptId && nameKey(p.displayName) === key);
 }
 
+function rosterLocked(game) {
+  const status = game.currentRound?.status;
+  return status === "guessing" || status === "actual";
+}
+
 export function addPlayer(game, name) {
   if (game.over) return { ok: false, error: "Game is over." };
+  if (rosterLocked(game)) {
+    return { ok: false, error: "Finish the round before adding someone." };
+  }
   const displayName = normalizeName(name);
   if (!displayName) return { ok: false, error: "Enter a name." };
   if (duplicateName(game, displayName)) return { ok: false, error: "That name is already in this game." };
   const player = { id: cryptoRandomId(), displayName, joinedAt: Date.now() };
   game.players.push(player);
-
-  const round = game.currentRound;
-  if (round && round.status === "guessing" && !round.guessOrder.includes(player.id)) {
-    round.guessOrder.push(player.id);
-  }
   return { ok: true, player };
 }
 
 export function removePlayer(game, playerId) {
   if (game.over) return { ok: false, error: "Game is over." };
-  if (game.currentRound && game.currentRound.status !== "revealed") {
+  if (rosterLocked(game)) {
     return { ok: false, error: "Finish the round before removing someone." };
+  }
+  if (game.players.length <= 1) {
+    return { ok: false, error: "You need at least one player." };
   }
   const idx = game.players.findIndex((p) => p.id === playerId);
   if (idx < 0) return { ok: false, error: "Player not found." };
@@ -105,43 +111,59 @@ export function setObject(game, objectName, unit) {
   game.lastUnit = unitLabel;
   round.status = "guessing";
   round.guessOrder = game.players.map((p) => p.id);
-  round.currentGuesserId = round.guessOrder[0] || null;
+  round.currentGuesserId = null;
   round.coverOpen = false;
   return { ok: true };
 }
 
-function advanceGuesser(round) {
-  const guessed = new Set(round.guesses.map((g) => g.playerId));
-  round.guessOrder = round.guessOrder.filter((id) => !guessed.has(id));
-  round.currentGuesserId = round.guessOrder[0] || null;
+function finishIfNonePending(round) {
+  round.currentGuesserId = null;
   round.coverOpen = false;
-  if (!round.currentGuesserId) {
+  if (!round.guessOrder.length && round.guesses.length) {
     round.status = "actual";
   }
+}
+
+export function pickGuesser(game, playerId) {
+  const round = game.currentRound;
+  if (!round || round.status !== "guessing") {
+    return { ok: false, error: "Not guessing." };
+  }
+  if (!round.guessOrder.includes(playerId)) {
+    return { ok: false, error: "That player already went." };
+  }
+  round.currentGuesserId = playerId;
+  round.coverOpen = false;
+  return { ok: true };
+}
+
+export function clearGuesser(game) {
+  const round = game.currentRound;
+  if (!round || round.status !== "guessing") return { ok: false, error: "Not guessing." };
+  round.currentGuesserId = null;
+  round.coverOpen = false;
+  return { ok: true };
 }
 
 export function openCover(game) {
   const round = game.currentRound;
   if (!round || round.status !== "guessing" || !round.currentGuesserId) {
-    return { ok: false, error: "Nobody to hand the phone to." };
+    return { ok: false, error: "Pick who is guessing first." };
   }
   round.coverOpen = true;
   return { ok: true };
 }
 
 export function closeCover(game) {
-  const round = game.currentRound;
-  if (!round || round.status !== "guessing") return { ok: false, error: "Not guessing." };
-  round.coverOpen = false;
-  return { ok: true };
+  return clearGuesser(game);
 }
 
 export function submitGuess(game, rawValue) {
   const round = game.currentRound;
   if (!round) return { ok: false, error: "No active round." };
   if (round.status === "revealed") return { ok: false, error: "This round is already revealed." };
-  if (round.status !== "guessing" || !round.coverOpen) {
-    return { ok: false, error: "It's not your turn yet." };
+  if (round.status !== "guessing" || !round.coverOpen || !round.currentGuesserId) {
+    return { ok: false, error: "Pick who is guessing first." };
   }
   const parsed = parseGuess(rawValue);
   if (!parsed.ok) {
@@ -157,25 +179,32 @@ export function submitGuess(game, rawValue) {
   const existing = round.guesses.find((g) => g.playerId === playerId);
   if (existing) existing.value = parsed.value;
   else round.guesses.push({ playerId, value: parsed.value });
-  advanceGuesser(round);
+  round.guessOrder = round.guessOrder.filter((id) => id !== playerId);
+  finishIfNonePending(round);
+  return { ok: true };
+}
+
+export function skipPlayer(game, playerId) {
+  const round = game.currentRound;
+  if (!round || round.status !== "guessing") {
+    return { ok: false, error: "Nobody to skip." };
+  }
+  if (!round.guessOrder.includes(playerId)) {
+    return { ok: false, error: "That player already went." };
+  }
+  if (round.guessOrder.length === 1 && !round.guesses.length) {
+    return { ok: false, error: "No guesses have been submitted yet." };
+  }
+  round.guesses = round.guesses.filter((g) => g.playerId !== playerId);
+  round.guessOrder = round.guessOrder.filter((id) => id !== playerId);
+  finishIfNonePending(round);
   return { ok: true };
 }
 
 export function skipCurrent(game) {
   const round = game.currentRound;
-  if (!round || round.status !== "guessing" || !round.currentGuesserId) {
-    return { ok: false, error: "Nobody to skip." };
-  }
-  if (round.guessOrder.length === 1 && !round.guesses.length) {
-    return { ok: false, error: "No guesses have been submitted yet." };
-  }
-  const id = round.currentGuesserId;
-  round.guesses = round.guesses.filter((g) => g.playerId !== id);
-  round.guessOrder = round.guessOrder.filter((pid) => pid !== id);
-  round.currentGuesserId = round.guessOrder[0] || null;
-  round.coverOpen = false;
-  if (!round.currentGuesserId) round.status = "actual";
-  return { ok: true };
+  if (!round?.currentGuesserId) return { ok: false, error: "Nobody to skip." };
+  return skipPlayer(game, round.currentGuesserId);
 }
 
 export function skipRemaining(game) {

@@ -100,8 +100,8 @@
             </li>
             <li>
               Name the object and an optional unit (default
-              <strong>grams</strong>). Then pass the phone. Each person locks in
-              a number without showing the others.
+              <strong>grams</strong>). Tap who guesses next — any order — then
+              hand them the phone so nobody sees the number.
             </li>
             <li>
               Weigh it, measure it, look it up. Enter the actual value and tap
@@ -218,7 +218,7 @@
         <ul id="lobby-players" class="player-list"></ul>
 
         <div class="add-row late-join">
-          <label class="field-label" for="late-name">Late joiner</label>
+        <label class="field-label" for="late-name">Add a player</label>
           <input
             id="late-name"
             class="text-input"
@@ -252,6 +252,7 @@
         <p class="eyebrow" id="round-kicker">Round</p>
 
         <div id="phase-naming" class="phase">
+          <a href="#lobby" class="back-link" id="naming-back">← Players</a>
           <h1>Name the object</h1>
           <p class="muted">What are we guessing?</p>
           <label class="field-label" for="object-name">Object</label>
@@ -279,6 +280,18 @@
           </div>
         </div>
 
+        <div id="phase-pick" class="phase hidden" hidden>
+          <h1>Who's guessing?</h1>
+          <p class="muted">Tap a name, then hand them the phone. Any order is fine.</p>
+          <p id="pick-progress" class="progress-line">0 / 0 guesses submitted</p>
+          <ul id="pick-list" class="pick-list"></ul>
+          <div class="setup-actions">
+            <button id="pick-skip-rest" class="btn btn-secondary" type="button">
+              Enter actual value
+            </button>
+          </div>
+        </div>
+
         <div id="phase-cover" class="phase cover-phase hidden" hidden>
           <div class="cover-card">
             <p class="eyebrow">Don’t peek</p>
@@ -292,11 +305,11 @@
               I’m ready
             </button>
             <div class="cover-alt">
+              <button id="cover-back" class="btn btn-ghost" type="button">
+                Someone else
+              </button>
               <button id="cover-skip" class="btn btn-ghost" type="button">
                 Skip this player
-              </button>
-              <button id="cover-skip-rest" class="btn btn-secondary" type="button">
-                Enter actual value
               </button>
             </div>
           </div>

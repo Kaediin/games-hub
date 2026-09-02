@@ -20,7 +20,7 @@ The full rules and a scored example are on the home screen. Short version:
 
 1. Add names. Pass this device around.
 2. Name an object and a unit (default grams).
-3. Each player locks in a secret guess — or skips.
+3. Tap who guesses next — any order — then lock in a secret number, or skip.
 4. Enter the actual value. Reveal.
 5. Closest 🏆, furthest 💀. Podium ranks average distance (lower is better).
 6. Next round, as many as you want.

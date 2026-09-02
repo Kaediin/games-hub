@@ -1,12 +1,14 @@
-import { template, toast } from "../ui.js";
+import { template, el, toast } from "../ui.js";
 import { state } from "../state.js";
 import { navigate } from "../router.js";
 import {
   setObject,
+  pickGuesser,
+  clearGuesser,
   openCover,
-  closeCover,
   submitGuess,
   skipCurrent,
+  skipPlayer,
   skipRemaining,
   revealRound,
   playerById,
@@ -29,27 +31,39 @@ export function renderRound(root) {
   root.appendChild(template("tpl-round"));
   const round = game.currentRound;
   const naming = root.querySelector("#phase-naming");
+  const pick = root.querySelector("#phase-pick");
   const cover = root.querySelector("#phase-cover");
   const guess = root.querySelector("#phase-guess");
   const actual = root.querySelector("#phase-actual");
 
-  naming.hidden = round.status !== "naming";
-  naming.classList.toggle("hidden", round.status !== "naming");
-  const showCover = round.status === "guessing" && !round.coverOpen;
+  const showPick = round.status === "guessing" && !round.currentGuesserId;
+  const showCover = round.status === "guessing" && !!round.currentGuesserId && !round.coverOpen;
   const showGuess = round.status === "guessing" && round.coverOpen;
-  cover.hidden = !showCover;
-  cover.classList.toggle("hidden", !showCover);
-  guess.hidden = !showGuess;
-  guess.classList.toggle("hidden", !showGuess);
-  actual.hidden = round.status !== "actual";
-  actual.classList.toggle("hidden", round.status !== "actual");
+
+  setPhase(naming, round.status === "naming");
+  setPhase(pick, showPick);
+  setPhase(cover, showCover);
+  setPhase(guess, showGuess);
+  setPhase(actual, round.status === "actual");
 
   root.querySelector("#round-kicker").textContent = `Round ${round.roundNumber}`;
 
   if (round.status === "naming") bindNaming(game, root);
+  else if (showPick) bindPick(game, root);
   else if (showCover) bindCover(game, root);
   else if (showGuess) bindGuess(game, root);
   else if (round.status === "actual") bindActual(game, root);
+}
+
+function setPhase(node, on) {
+  if (!node) return;
+  node.hidden = !on;
+  node.classList.toggle("hidden", !on);
+}
+
+function progressLabel(game) {
+  const round = game.currentRound;
+  return `${guessedCount(round)} / ${game.players.length} guesses submitted`;
 }
 
 function bindNaming(game, root) {
@@ -59,6 +73,13 @@ function bindNaming(game, root) {
   nameInput.value = round.objectName || "";
   unitInput.value = round.unit || "grams";
   nameInput.focus();
+
+  root.querySelector("#naming-back").addEventListener("click", (e) => {
+    e.preventDefault();
+    game.currentRound = null;
+    persist(game);
+    navigate("lobby");
+  });
 
   root.querySelector("#lock-object").addEventListener("click", () => {
     const r = setObject(game, nameInput.value, unitInput.value);
@@ -71,10 +92,84 @@ function bindNaming(game, root) {
   });
 }
 
-function progressLabel(game) {
+function bindPick(game, root) {
   const round = game.currentRound;
-  const total = game.players.length;
-  return `${guessedCount(round)} / ${total} guesses submitted`;
+  root.querySelector("#pick-progress").textContent = progressLabel(game);
+  const list = root.querySelector("#pick-list");
+  list.innerHTML = "";
+
+  const pending = new Set(round.guessOrder);
+  const guessed = new Set(round.guesses.map((g) => g.playerId));
+
+  game.players.forEach((p) => {
+    if (pending.has(p.id)) {
+      list.appendChild(
+        el(
+          "li",
+          { class: "pick-row" },
+          el(
+            "button",
+            {
+              type: "button",
+              class: "pick-player",
+              onclick: () => {
+                const r = pickGuesser(game, p.id);
+                if (!r.ok) {
+                  toast(r.error);
+                  return;
+                }
+                persist(game);
+                navigate("round");
+              },
+            },
+            el("span", { class: "player-name" }, p.displayName),
+            el("span", { class: "player-meta" }, "Tap to guess")
+          ),
+          el(
+            "button",
+            {
+              type: "button",
+              class: "chip-remove",
+              "aria-label": `Skip ${p.displayName}`,
+              onclick: () => {
+                const r = skipPlayer(game, p.id);
+                if (!r.ok) {
+                  toast(r.error);
+                  return;
+                }
+                persist(game);
+                navigate("round");
+              },
+            },
+            "Skip"
+          )
+        )
+      );
+      return;
+    }
+
+    const label = guessed.has(p.id) ? "in" : "skipped";
+    list.appendChild(
+      el(
+        "li",
+        { class: `pick-row is-done is-${guessed.has(p.id) ? "in" : "skip"}` },
+        el("span", { class: "player-name" }, p.displayName),
+        el("span", { class: "player-meta" }, label)
+      )
+    );
+  });
+
+  const skipRest = root.querySelector("#pick-skip-rest");
+  skipRest.disabled = !round.guesses.length;
+  skipRest.addEventListener("click", () => {
+    const r = skipRemaining(game);
+    if (!r.ok) {
+      toast(r.error);
+      return;
+    }
+    persist(game);
+    navigate("round");
+  });
 }
 
 function bindCover(game, root) {
@@ -82,27 +177,21 @@ function bindCover(game, root) {
   const player = playerById(game, round.currentGuesserId);
   root.querySelector("#cover-name").textContent = player?.displayName || "the next player";
   root.querySelector("#cover-progress").textContent = progressLabel(game);
-  fillSubmitted(game, root.querySelector("#submitted-list"));
+  const submitted = root.querySelector("#submitted-list");
+  if (submitted) submitted.replaceChildren();
 
   root.querySelector("#cover-ready").addEventListener("click", () => {
     openCover(game);
     persist(game);
     navigate("round");
   });
+  root.querySelector("#cover-back").addEventListener("click", () => {
+    clearGuesser(game);
+    persist(game);
+    navigate("round");
+  });
   root.querySelector("#cover-skip").addEventListener("click", () => {
     const r = skipCurrent(game);
-    if (!r.ok) {
-      toast(r.error);
-      return;
-    }
-    persist(game);
-    navigate(game.currentRound.status === "actual" ? "round" : "round");
-  });
-
-  const skipRest = root.querySelector("#cover-skip-rest");
-  skipRest.disabled = !round.guesses.length;
-  skipRest.addEventListener("click", () => {
-    const r = skipRemaining(game);
     if (!r.ok) {
       toast(r.error);
       return;
@@ -138,7 +227,7 @@ function bindGuess(game, root) {
     }
   });
   root.querySelector("#guess-back").addEventListener("click", () => {
-    closeCover(game);
+    clearGuesser(game);
     persist(game);
     navigate("round");
   });

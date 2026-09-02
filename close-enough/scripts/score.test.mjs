@@ -11,17 +11,25 @@ import {
 import {
   createGame,
   addPlayer,
+  removePlayer,
   startRound,
   setObject,
+  pickGuesser,
   openCover,
   submitGuess,
-  skipCurrent,
+  skipPlayer,
   skipRemaining,
   revealRound,
   nextRound,
 } from "../js/game.js";
 
-function playGuess(game, value) {
+function playGuess(game, value, playerName = null) {
+  const round = game.currentRound;
+  const id = playerName
+    ? game.players.find((p) => p.displayName === playerName)?.id
+    : round.guessOrder[0];
+  assert.ok(id, "player to guess");
+  assert.equal(pickGuesser(game, id).ok, true);
   assert.equal(openCover(game).ok, true);
   const r = submitGuess(game, value);
   assert.equal(r.ok, true, r.error);
@@ -166,10 +174,11 @@ describe("game mutations", () => {
 
   it("acceptance: David omitted, Bob wins, Charlie loses", () => {
     const game = setupFour();
-    playGuess(game, 450); // Alice
-    playGuess(game, 440); // Bob
-    playGuess(game, 500); // Charlie
-    assert.equal(skipCurrent(game).ok, true); // David
+    playGuess(game, 450, "Alice");
+    playGuess(game, 440, "Bob");
+    playGuess(game, 500, "Charlie");
+    const david = game.players.find((p) => p.displayName === "David");
+    assert.equal(skipPlayer(game, david.id).ok, true);
     const revealed = revealRound(game, 438);
     assert.equal(revealed.ok, true);
     const round = revealed.round;
@@ -219,14 +228,47 @@ describe("game mutations", () => {
     assert.equal(david.averageDistance, 0);
   });
 
+  it("lets any pending player guess next, not list order", () => {
+    const game = setupFour();
+    playGuess(game, 500, "Charlie");
+    playGuess(game, 440, "Bob");
+    assert.equal(game.currentRound.guesses[0].playerId, game.players.find((p) => p.displayName === "Charlie").id);
+    assert.equal(game.currentRound.guessOrder.includes(game.players.find((p) => p.displayName === "Alice").id), true);
+  });
+
   it("cannot skip the last remaining player when nobody has guessed", () => {
     const game = createGame(["Alice", "Bob"]);
     startRound(game);
     setObject(game, "Mug", "grams");
-    assert.equal(skipCurrent(game).ok, true);
-    const last = skipCurrent(game);
+    const alice = game.players.find((p) => p.displayName === "Alice");
+    const bob = game.players.find((p) => p.displayName === "Bob");
+    assert.equal(skipPlayer(game, alice.id).ok, true);
+    const last = skipPlayer(game, bob.id);
     assert.equal(last.ok, false);
     assert.match(last.error, /No guesses have been submitted yet/);
+  });
+
+  it("can add and remove players after a round", () => {
+    const game = createGame(["Alice", "Bob"]);
+    startRound(game);
+    setObject(game, "Mug", "grams");
+    playGuess(game, 10, "Alice");
+    playGuess(game, 12, "Bob");
+    revealRound(game, 11);
+    assert.equal(addPlayer(game, "David").ok, true);
+    const bob = game.players.find((p) => p.displayName === "Bob");
+    assert.equal(removePlayer(game, bob.id).ok, true);
+    assert.equal(game.players.map((p) => p.displayName).join(","), "Alice,David");
+    assert.equal(removePlayer(game, game.players[0].id).ok, true);
+    assert.equal(removePlayer(game, game.players[0].id).ok, false);
+  });
+
+  it("cannot remove a player while guesses are open", () => {
+    const game = createGame(["Alice", "Bob"]);
+    startRound(game);
+    setObject(game, "Mug", "grams");
+    const r = removePlayer(game, game.players[0].id);
+    assert.equal(r.ok, false);
   });
 
   it("duplicate names are rejected case-insensitively", () => {
