@@ -23,11 +23,7 @@ export function renderPodium(ranked) {
         "div",
         { class: `podium-col podium-${place}${row ? "" : " is-empty"}` },
         el("div", { class: "podium-name" }, row ? row.displayName : "—"),
-        el(
-          "div",
-          { class: "podium-avg" },
-          row ? `${formatAvg(row.averageDistance)} avg` : ""
-        ),
+        el("div", { class: "podium-avg" }, row ? `${formatNumber(row.points)} pts` : ""),
         el("div", { class: "podium-block" }, el("span", { class: "podium-place" }, place))
       )
     );
@@ -35,20 +31,21 @@ export function renderPodium(ranked) {
   return wrap;
 }
 
-export function renderTable(ranked, { compact = false } = {}) {
-  const table = el("table", { class: `board-table${compact ? " is-compact" : ""}` });
+export function renderTable(ranked) {
+  const wrap = el("div", { class: "board-scroll" });
+  const table = el("table", { class: "board-table" });
   const head = el(
     "thead",
     {},
     el(
       "tr",
       {},
-      el("th", {}, "Player"),
-      compact ? null : el("th", {}, "Wins"),
-      compact ? null : el("th", {}, "Losses"),
-      el("th", {}, "Avg"),
-      compact ? null : el("th", {}, "Total"),
-      el("th", {}, "Rounds")
+      el("th", {}, "Name"),
+      el("th", {}, "Rounds"),
+      el("th", {}, "Points"),
+      el("th", {}, "Average points"),
+      el("th", {}, "Exact correct"),
+      el("th", {}, "Total difference")
     )
   );
   const body = el("tbody");
@@ -58,16 +55,17 @@ export function renderTable(ranked, { compact = false } = {}) {
         "tr",
         { class: r.rank === 1 ? "is-lead" : "" },
         el("td", { class: "td-name" }, r.rank ? `${r.rank}. ${r.displayName}` : `— ${r.displayName}`),
-        compact ? null : el("td", {}, String(r.wins)),
-        compact ? null : el("td", {}, String(r.losses)),
-        el("td", {}, formatAvg(r.averageDistance)),
-        compact ? null : el("td", {}, formatNumber(r.cumulativeDistance)),
-        el("td", {}, String(r.roundsParticipated))
+        el("td", {}, String(r.roundsParticipated)),
+        el("td", {}, formatNumber(r.points)),
+        el("td", {}, formatAvg(r.averagePoints)),
+        el("td", {}, String(r.exactCorrect)),
+        el("td", {}, formatNumber(r.cumulativeDistance))
       )
     );
   });
   table.append(head, body);
-  return table;
+  wrap.appendChild(table);
+  return wrap;
 }
 
 export function boardFor(game) {

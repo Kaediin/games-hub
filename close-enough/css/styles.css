@@ -713,12 +713,23 @@ body[data-route="history"] .view {
 
 .board-table {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
   background: var(--bg-elev);
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
+}
+.board-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+.round-roster {
+  margin-top: 28px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }
 .board-table th,
 .board-table td {
@@ -811,14 +822,6 @@ body[data-route="history"] .view {
 }
 
 @media (max-width: 520px) {
-  .board-table:not(.is-compact) th:nth-child(2),
-  .board-table:not(.is-compact) td:nth-child(2),
-  .board-table:not(.is-compact) th:nth-child(3),
-  .board-table:not(.is-compact) td:nth-child(3),
-  .board-table:not(.is-compact) th:nth-child(5),
-  .board-table:not(.is-compact) td:nth-child(5) {
-    display: none;
-  }
   .podium {
     min-height: 150px;
   }

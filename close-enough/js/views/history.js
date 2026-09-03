@@ -41,7 +41,7 @@ export function renderHistory(root) {
             "div",
             {},
             lead
-              ? `${lead.displayName} · ${formatAvg(lead.averageDistance)} avg (${formatNumber(lead.cumulativeDistance)} total)`
+              ? `${lead.displayName} · ${formatNumber(lead.points)} pts (${formatAvg(lead.averagePoints)} avg)`
               : (g.players || []).map((p) => p.displayName).join(" · ")
           )
         )

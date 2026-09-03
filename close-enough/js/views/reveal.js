@@ -3,10 +3,11 @@ import { state } from "../state.js";
 import { navigate } from "../router.js";
 import { nextRound, endGame, historyEntry } from "../game.js";
 import { persist, resumeRoute } from "../play.js";
-import { boardFor, formatAvg, renderPodium, renderTable, unitSuffix } from "../standings.js";
+import { boardFor, renderPodium, renderTable, unitSuffix } from "../standings.js";
 import { formatNumber } from "../score.js";
 import { burstConfetti } from "../confetti.js";
 import { roundSummary } from "./lobby.js";
+import { mountRoster } from "../roster.js";
 
 export function renderReveal(root) {
   const game = state.getGame();
@@ -37,7 +38,11 @@ export function renderReveal(root) {
       el("span", { class: "reveal-rank" }, String(i + 1)),
       el("span", { class: "reveal-name" }, `${p.displayName} ${marks.join(" ")}`.trim()),
       el("span", { class: "reveal-guess" }, `guessed ${formatNumber(p.guess)}`),
-      el("span", { class: "reveal-dist" }, `${p.displayName} was ${formatNumber(p.distance)} off`)
+      el(
+        "span",
+        { class: "reveal-dist" },
+        `${formatNumber(p.distance)} off · ${formatNumber(p.points)} pts${p.exactBonus ? ` (+${p.exactBonus} exact)` : ""}`
+      )
     );
     li.style.animationDelay = `${180 + i * 140}ms`;
     list.appendChild(li);
@@ -46,10 +51,21 @@ export function renderReveal(root) {
   const ranked = boardFor(game);
   const podiumHost = root.querySelector("#reveal-podium");
   podiumHost.append(
-    el("h2", { class: "section-label" }, "Who's actually good at this?"),
+    el("h2", { class: "section-label" }, "Leaderboard"),
     renderPodium(ranked),
     renderTable(ranked)
   );
+
+  mountRoster(root.querySelector("#reveal-roster"), game, {
+    onChange: () => {
+      persist(game);
+      navigate("reveal");
+    },
+    metaFor: (p) => {
+      const row = ranked.find((r) => r.id === p.id);
+      return row?.roundsParticipated ? `${formatNumber(row.points)} pts` : "not played yet";
+    },
+  });
 
   const past = root.querySelector("#reveal-history");
   game.rounds.forEach((r) => past.appendChild(roundSummary(r)));
@@ -80,5 +96,3 @@ export function renderReveal(root) {
 
   return () => stopConfetti();
 }
-
-export { formatAvg };

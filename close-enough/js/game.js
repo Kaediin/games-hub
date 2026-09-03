@@ -45,35 +45,64 @@ export function duplicateName(game, name, exceptId = null) {
   return game.players.some((p) => p.id !== exceptId && nameKey(p.displayName) === key);
 }
 
-function rosterLocked(game) {
-  const status = game.currentRound?.status;
-  return status === "guessing" || status === "actual";
+function attachPlayerToRound(game, playerId) {
+  const round = game.currentRound;
+  if (!round || round.status === "revealed") return;
+  if (round.guesses.some((g) => g.playerId === playerId)) return;
+  if (!round.guessOrder.includes(playerId)) round.guessOrder.push(playerId);
+  if (round.status === "actual") {
+    round.status = "guessing";
+    round.currentGuesserId = null;
+    round.coverOpen = false;
+  }
+}
+
+function detachPlayerFromRound(game, playerId) {
+  const round = game.currentRound;
+  if (!round || round.status === "revealed") return;
+  round.guesses = round.guesses.filter((g) => g.playerId !== playerId);
+  round.guessOrder = round.guessOrder.filter((id) => id !== playerId);
+  if (round.currentGuesserId === playerId) {
+    round.currentGuesserId = null;
+    round.coverOpen = false;
+  }
+  if (round.status === "naming") return;
+  if (!round.guesses.length) {
+    round.guessOrder = game.players.map((p) => p.id);
+    round.status = "guessing";
+    round.currentGuesserId = null;
+    round.coverOpen = false;
+    return;
+  }
+  if (!round.guessOrder.length) {
+    round.status = "actual";
+    round.currentGuesserId = null;
+    round.coverOpen = false;
+    return;
+  }
+  round.status = "guessing";
 }
 
 export function addPlayer(game, name) {
   if (game.over) return { ok: false, error: "Game is over." };
-  if (rosterLocked(game)) {
-    return { ok: false, error: "Finish the round before adding someone." };
-  }
   const displayName = normalizeName(name);
   if (!displayName) return { ok: false, error: "Enter a name." };
   if (duplicateName(game, displayName)) return { ok: false, error: "That name is already in this game." };
   const player = { id: cryptoRandomId(), displayName, joinedAt: Date.now() };
   game.players.push(player);
+  attachPlayerToRound(game, player.id);
   return { ok: true, player };
 }
 
 export function removePlayer(game, playerId) {
   if (game.over) return { ok: false, error: "Game is over." };
-  if (rosterLocked(game)) {
-    return { ok: false, error: "Finish the round before removing someone." };
-  }
   if (game.players.length <= 1) {
     return { ok: false, error: "You need at least one player." };
   }
   const idx = game.players.findIndex((p) => p.id === playerId);
   if (idx < 0) return { ok: false, error: "Player not found." };
   game.players.splice(idx, 1);
+  detachPlayerFromRound(game, playerId);
   return { ok: true };
 }
 
@@ -249,6 +278,11 @@ export function revealRound(game, rawActual) {
       displayName: player?.displayName || "Player",
       guess: e.value,
       distance: e.distance,
+      place: e.place,
+      rankPoints: e.rankPoints,
+      exactBonus: e.exactBonus,
+      points: e.points,
+      isExact: e.isExact,
       isWinner: e.isWinner,
       isLoser: e.isLoser,
     };

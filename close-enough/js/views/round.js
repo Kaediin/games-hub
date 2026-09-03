@@ -15,6 +15,7 @@ import {
   guessedCount,
 } from "../game.js";
 import { persist, resumeRoute } from "../play.js";
+import { mountRoster } from "../roster.js";
 
 export function renderRound(root) {
   const game = state.getGame();
@@ -53,6 +54,22 @@ export function renderRound(root) {
   else if (showCover) bindCover(game, root);
   else if (showGuess) bindGuess(game, root);
   else if (round.status === "actual") bindActual(game, root);
+
+  mountRoster(root.querySelector("#round-roster"), game, {
+    onChange: () => {
+      persist(game);
+      navigate("round");
+    },
+    metaFor: (p) => playerRoundMeta(game, p.id),
+  });
+}
+
+function playerRoundMeta(game, playerId) {
+  const round = game.currentRound;
+  if (!round || round.status === "naming") return "";
+  if (round.guesses.some((g) => g.playerId === playerId)) return "in";
+  if (round.guessOrder.includes(playerId)) return "waiting";
+  return "skipped";
 }
 
 function setPhase(node, on) {

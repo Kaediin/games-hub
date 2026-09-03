@@ -1,9 +1,11 @@
 import { template, el, toast, confirmAction } from "../ui.js";
 import { state } from "../state.js";
 import { navigate } from "../router.js";
-import { addPlayer, removePlayer, startRound, endGame, historyEntry } from "../game.js";
+import { startRound, endGame, historyEntry } from "../game.js";
 import { persist, resumeRoute } from "../play.js";
-import { boardFor, formatAvg, renderPodium, renderTable } from "../standings.js";
+import { boardFor, renderPodium, renderTable } from "../standings.js";
+import { formatNumber } from "../score.js";
+import { mountRoster } from "../roster.js";
 
 export function renderLobby(root) {
   const game = state.getGame();
@@ -23,61 +25,24 @@ export function renderLobby(root) {
   const waitEl = root.querySelector("#lobby-wait");
   if (game.rounds.length) waitEl.classList.add("hidden");
 
-  const list = root.querySelector("#lobby-players");
-  const canRemove = game.players.length > 1;
-  game.players.forEach((p) => {
-    const row = boardFor(game).find((r) => r.id === p.id);
-    const meta = row?.roundsParticipated
-      ? `${formatAvg(row.averageDistance)} avg`
-      : "not played yet";
-    const actions = [
-      el("span", { class: "player-meta" }, meta),
-    ];
-    if (canRemove) {
-      actions.push(
-        el(
-          "button",
-          {
-            type: "button",
-            class: "chip-remove",
-            "aria-label": `Remove ${p.displayName}`,
-            onclick: () => {
-              if (
-                !confirmAction(
-                  `Remove ${p.displayName}? They won't play the next round. Past rounds stay in history.`
-                )
-              )
-                return;
-              const r = removePlayer(game, p.id);
-              if (!r.ok) {
-                toast(r.error);
-                return;
-              }
-              persist(game);
-              navigate("lobby");
-            },
-          },
-          "Remove"
-        )
-      );
-    }
-    list.appendChild(
-      el(
-        "li",
-        { class: "player-row" },
-        el("span", { class: "player-name" }, p.displayName),
-        el("div", { class: "player-actions" }, ...actions)
-      )
-    );
+  const ranked = boardFor(game);
+  mountRoster(root.querySelector("#lobby-roster"), game, {
+    onChange: () => {
+      persist(game);
+      navigate("lobby");
+    },
+    metaFor: (p) => {
+      const row = ranked.find((r) => r.id === p.id);
+      return row?.roundsParticipated ? `${formatNumber(row.points)} pts` : "not played yet";
+    },
   });
 
-  const ranked = boardFor(game);
   const board = root.querySelector("#lobby-board");
   if (game.rounds.length) {
     board.append(
-      el("h2", { class: "section-label" }, "Who's actually good at this?"),
+      el("h2", { class: "section-label" }, "Leaderboard"),
       renderPodium(ranked),
-      renderTable(ranked, { compact: true })
+      renderTable(ranked)
     );
   }
 
@@ -89,23 +54,6 @@ export function renderLobby(root) {
   } else {
     past.appendChild(el("p", { class: "muted" }, "No rounds yet."));
   }
-
-  const addInput = root.querySelector("#late-name");
-  root.querySelector("#late-add").addEventListener("click", () => {
-    const r = addPlayer(game, addInput.value);
-    if (!r.ok) {
-      toast(r.error);
-      return;
-    }
-    persist(game);
-    navigate("lobby");
-  });
-  addInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      root.querySelector("#late-add").click();
-    }
-  });
 
   root.querySelector("#start-round").addEventListener("click", () => {
     const r = startRound(game);
@@ -129,7 +77,7 @@ export function renderLobby(root) {
 export function roundSummary(round) {
   const winners = round.participants.filter((p) => p.isWinner).map((p) => p.displayName);
   const losers = round.participants.filter((p) => p.isLoser).map((p) => p.displayName);
-  const line = winners.length ? `🏆 ${winners.join(", ")}` : "No winner";
+  const line = winners.length ? `🏆 ${winners.join(", ")}` : "No closest guess";
   const skull = losers.length ? ` · 💀 ${losers.join(", ")}` : "";
   return el(
     "li",
@@ -144,13 +92,11 @@ export function roundSummary(round) {
     el(
       "ul",
       { class: "guess-mini" },
-      ...round.participants.map((p) =>
-        el(
-          "li",
-          {},
-          `${p.displayName}: ${p.guess} (${p.distance} off)`
-        )
-      )
+      ...round.participants.map((p) => {
+        const bonus = p.exactBonus ? ` +${p.exactBonus} exact` : "";
+        const pts = p.points != null ? ` · ${p.points} pts${bonus}` : "";
+        return el("li", {}, `${p.displayName}: ${p.guess} (${p.distance} off)${pts}`);
+      })
     )
   );
 }

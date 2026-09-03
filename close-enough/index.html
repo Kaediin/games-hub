@@ -10,7 +10,7 @@
     <title>Close Enough</title>
     <meta
       name="description"
-      content="Pass-the-phone party game. Guess the number. Closest wins. Furthest drinks."
+      content="Pass-the-phone party game. Guess the number. Closest scores. Exact hits get a bonus."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -70,7 +70,7 @@
           <p class="eyebrow">Pass the phone · party classic</p>
           <h1 class="hero-title">Close Enough</h1>
           <p class="hero-tagline">
-            Guess the number. Closest wins. Furthest drinks.
+            Guess the number. Closest scores. Exact hits get a bonus.
           </p>
           <div class="hero-actions">
             <button class="btn btn-primary" data-action="new-game">New game</button>
@@ -86,8 +86,8 @@
           <p>
             Grab a random object — a remote, a bottle, a candle — and guess how
             much it weighs, costs, or measures. Pass this phone around so
-            guesses stay secret. Closest wins the round. Furthest takes the
-            punishment. Play as many rounds as you like.
+            guesses stay secret. Closest scores the most points. Furthest
+            takes the punishment. Play as many rounds as you like.
           </p>
         </section>
 
@@ -96,7 +96,8 @@
           <ol class="how-list">
             <li>
               Add everyone who is playing. One shared phone is enough — an
-              iPhone or iPad is perfect.
+              iPhone or iPad is perfect. You can add or remove players at any
+              time, even mid-round.
             </li>
             <li>
               Name the object and an optional unit (default
@@ -108,8 +109,9 @@
               <strong>Reveal</strong>.
             </li>
             <li>
-              See who was closest and who was furthest. Then check the
-              <strong>podium</strong> — lowest average miss over the night wins.
+              Closest takes the round’s top points. An exact hit also scores a
+              bonus. The <strong>leaderboard</strong> ranks total points over
+              the night.
             </li>
             <li>
               Tap <strong>Next round</strong> and pick another object. Stop
@@ -121,36 +123,40 @@
         <section class="card">
           <h2>How scoring works</h2>
           <p>
-            There is no exact right answer. You are scored on
-            <strong>how far off</strong> you were — like GeoGuessr, but with a
-            number instead of a map.
+            Each round, guesses are ranked by how close they were —
+            <strong>distance = |your guess − the real value|</strong>. If you
+            skip, that round does not count for you.
           </p>
           <p>
-            Each round:
-            <strong>distance = |your guess − the real value|</strong>. Closest
-            wins the round. Furthest takes the punishment. If you skip, that
-            round does not count for you.
+            With <strong>n</strong> guesses that round, points are:
+            <strong>1st = n</strong>, 2nd = n−1, 3rd = n−2, and so on. Tied
+            players share that place and the next place is skipped.
           </p>
           <p>
-            The <strong>podium</strong> is who has the
-            <strong>lowest average miss</strong> over the rounds they played.
-            Winning one round is nice; staying consistently close wins the night.
+            Nail it exactly and you get a bonus equal to the
+            <strong>number of digits</strong> in the actual value (ignoring
+            anything after the decimal): 9&nbsp;g → +1, 53&nbsp;g → +2,
+            627&nbsp;g → +3, 3444&nbsp;g → +4.
+          </p>
+          <p>
+            The <strong>leaderboard</strong> is ranked by
+            <strong>points</strong>. It also shows rounds played, average
+            points, exact hits, and total difference.
           </p>
           <div class="example">
             <h3>Example — TV Remote, actually 438 grams</h3>
             <ul class="tip-list">
-              <li>Alice guessed 450 → <strong>12</strong> off</li>
-              <li>Bob guessed 440 → <strong>2</strong> off — closest, wins the round</li>
-              <li>Charlie guessed 500 → <strong>62</strong> off — furthest</li>
+              <li>Alice guessed 450 → 12 off → <strong>2nd, 2 pts</strong></li>
+              <li>Bob guessed 440 → 2 off → <strong>1st, 3 pts</strong></li>
+              <li>Charlie guessed 500 → 62 off → <strong>3rd, 1 pt</strong></li>
               <li>David skipped → nothing on his record</li>
             </ul>
             <p>
-              Next round Alice is 8 off and Bob is 20 off. Averages: Alice
-              <strong>10</strong>, Bob <strong>11</strong>. Alice is ahead on
-              the podium even though Bob won the first round.
+              Three guesses, so n = 3. Nobody hit 438 exactly, so no digit
+              bonus this round. Bob leads 3–2–1.
             </p>
             <p class="muted">
-              Skipped rounds never count as zero. Lower average is better.
+              Skipped rounds never count as zero. More points is better.
             </p>
           </div>
         </section>
@@ -215,21 +221,7 @@
         <p class="eyebrow" id="lobby-count">Players</p>
         <h1>Lobby</h1>
         <p id="lobby-wait" class="muted">Waiting for the game to start...</p>
-        <ul id="lobby-players" class="player-list"></ul>
-
-        <div class="add-row late-join">
-        <label class="field-label" for="late-name">Add a player</label>
-          <input
-            id="late-name"
-            class="text-input"
-            type="text"
-            maxlength="24"
-            autocomplete="off"
-            autocapitalize="words"
-            placeholder="Another name"
-          />
-          <button id="late-add" class="btn btn-secondary" type="button">Add</button>
-        </div>
+        <div id="lobby-roster"></div>
 
         <div id="lobby-board" class="lobby-board"></div>
 
@@ -368,6 +360,8 @@
             </button>
           </div>
         </div>
+
+        <div id="round-roster" class="round-roster"></div>
       </section>
     </template>
 
@@ -378,6 +372,7 @@
         <p id="reveal-object" class="muted"></p>
         <ul id="reveal-standings" class="reveal-standings"></ul>
         <div id="reveal-podium" class="reveal-podium"></div>
+        <div id="reveal-roster" class="round-roster"></div>
         <h2 class="section-label">Round history</h2>
         <ul id="reveal-history" class="history-rounds-live"></ul>
         <div class="setup-actions">

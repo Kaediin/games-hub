@@ -1,6 +1,6 @@
 # Close Enough
 
-A pass-the-phone party game. Guess a number (weight, price, length — whatever the table decides). Closest wins the round. Furthest drinks. The podium is **lowest average miss** over the night.
+A pass-the-phone party game. Guess a number (weight, price, length — whatever the table decides). Closest wins the round. Furthest drinks. The podium is **most points** over the night.
 
 No backend, no account, no tracking — everything runs in your browser and is saved to `localStorage`.
 
@@ -22,8 +22,8 @@ The full rules and a scored example are on the home screen. Short version:
 2. Name an object and a unit (default grams).
 3. Tap who guesses next — any order — then lock in a secret number, or skip.
 4. Enter the actual value. Reveal.
-5. Closest 🏆, furthest 💀. Podium ranks average distance (lower is better).
-6. Next round, as many as you want.
+5. Closest scores the most. Exact hits get a digit bonus. Leaderboard ranks points.
+6. Next round, as many as you want. Add or remove players whenever.
 
 Skipped rounds never count as zero.
 

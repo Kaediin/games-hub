@@ -2,6 +2,7 @@ import { template, el } from "../ui.js";
 import { state } from "../state.js";
 import { navigate } from "../router.js";
 import { boardFor, renderPodium, renderTable } from "../standings.js";
+import { formatNumber } from "../score.js";
 import { roundSummary } from "./lobby.js";
 
 export function renderEnd(root) {
@@ -19,10 +20,10 @@ export function renderEnd(root) {
   const ranked = boardFor(game);
   const lead = ranked.find((r) => r.rank === 1);
   root.querySelector("#end-title").textContent = lead
-    ? `${lead.displayName} was closest overall`
+    ? `${lead.displayName} takes the night`
     : "That's a wrap";
   root.querySelector("#end-detail").textContent = lead
-    ? `Lowest average miss after ${game.rounds.length} round${game.rounds.length === 1 ? "" : "s"}.`
+    ? `${formatNumber(lead.points)} points after ${game.rounds.length} round${game.rounds.length === 1 ? "" : "s"}.`
     : "No one submitted a guess.";
 
   const board = root.querySelector("#end-board");

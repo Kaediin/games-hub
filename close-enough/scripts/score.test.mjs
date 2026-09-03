@@ -7,6 +7,7 @@ import {
   playerStats,
   rankPlayers,
   formatNumber,
+  tenthOrder,
 } from "../js/score.js";
 import {
   createGame,
@@ -77,6 +78,53 @@ describe("scoreRound", () => {
     assert.deepEqual(loserIds, ["charlie"]);
   });
 
+  it("awards n, n-1, n-2 rank points", () => {
+    const { entries } = scoreRound(
+      [
+        { playerId: "alice", value: 450 },
+        { playerId: "bob", value: 440 },
+        { playerId: "charlie", value: 500 },
+      ],
+      438
+    );
+    assert.equal(entries.find((e) => e.playerId === "bob").points, 3);
+    assert.equal(entries.find((e) => e.playerId === "alice").points, 2);
+    assert.equal(entries.find((e) => e.playerId === "charlie").points, 1);
+  });
+
+  it("tied players share a place and the next place is skipped", () => {
+    const { entries } = scoreRound(
+      [
+        { playerId: "alice", value: 12 },
+        { playerId: "bob", value: 8 },
+        { playerId: "charlie", value: 20 },
+        { playerId: "dana", value: 30 },
+      ],
+      10
+    );
+    // n=4, Alice & Bob both 2 off (best), Charlie 10, Dana 20
+    assert.equal(entries.find((e) => e.playerId === "alice").points, 4);
+    assert.equal(entries.find((e) => e.playerId === "bob").points, 4);
+    assert.equal(entries.find((e) => e.playerId === "charlie").points, 2);
+    assert.equal(entries.find((e) => e.playerId === "dana").points, 1);
+  });
+
+  it("adds a tenth-order bonus on an exact guess", () => {
+    const { entries } = scoreRound(
+      [
+        { playerId: "alice", value: 53 },
+        { playerId: "bob", value: 50 },
+      ],
+      53
+    );
+    const alice = entries.find((e) => e.playerId === "alice");
+    assert.equal(alice.isExact, true);
+    assert.equal(alice.rankPoints, 2);
+    assert.equal(alice.exactBonus, 2);
+    assert.equal(alice.points, 4);
+    assert.equal(entries.find((e) => e.playerId === "bob").points, 1);
+  });
+
   it("shares wins and losses on ties", () => {
     const { winnerIds, loserIds } = scoreRound(
       [
@@ -103,9 +151,10 @@ describe("scoreRound", () => {
     assert.equal(entries.length, 2);
   });
 
-  it("single participant: distance only, no win or loss", () => {
+  it("single participant: distance and points, no win or loss badge", () => {
     const { entries, winnerIds, loserIds } = scoreRound([{ playerId: "solo", value: 100 }], 90);
     assert.equal(entries[0].distance, 10);
+    assert.equal(entries[0].points, 1);
     assert.equal(entries[0].isWinner, false);
     assert.equal(entries[0].isLoser, false);
     assert.deepEqual(winnerIds, []);
@@ -113,19 +162,34 @@ describe("scoreRound", () => {
   });
 });
 
+describe("tenthOrder", () => {
+  it("is the digit count of the integer part", () => {
+    assert.equal(tenthOrder(9), 1);
+    assert.equal(tenthOrder(53), 2);
+    assert.equal(tenthOrder(627), 3);
+    assert.equal(tenthOrder(3444), 4);
+  });
+  it("uses the integer part for decimals and treats 0 as 1", () => {
+    assert.equal(tenthOrder(9.5), 1);
+    assert.equal(tenthOrder(53.2), 2);
+    assert.equal(tenthOrder(0), 1);
+    assert.equal(tenthOrder(0.4), 1);
+  });
+});
+
 describe("averages and late joiners", () => {
   const round1 = {
     participants: [
-      { playerId: "alice", distance: 12, isWinner: false, isLoser: false },
-      { playerId: "bob", distance: 2, isWinner: true, isLoser: false },
-      { playerId: "charlie", distance: 62, isWinner: false, isLoser: true },
+      { playerId: "alice", distance: 12, points: 2, isExact: false, isWinner: false, isLoser: false },
+      { playerId: "bob", distance: 2, points: 3, isExact: false, isWinner: true, isLoser: false },
+      { playerId: "charlie", distance: 62, points: 1, isExact: false, isWinner: false, isLoser: true },
     ],
   };
   const round2 = {
     participants: [
-      { playerId: "alice", distance: 8, isWinner: true, isLoser: false },
-      { playerId: "bob", distance: 20, isWinner: false, isLoser: true },
-      { playerId: "david", distance: 4, isWinner: false, isLoser: false },
+      { playerId: "alice", distance: 8, points: 2, isExact: false, isWinner: true, isLoser: false },
+      { playerId: "bob", distance: 20, points: 1, isExact: false, isWinner: false, isLoser: true },
+      { playerId: "david", distance: 4, points: 3, isExact: false, isWinner: false, isLoser: false },
     ],
   };
 
@@ -133,20 +197,25 @@ describe("averages and late joiners", () => {
     const david = playerStats("david", [round1, round2]);
     assert.equal(david.roundsParticipated, 1);
     assert.equal(david.averageDistance, 4);
+    assert.equal(david.points, 3);
+    assert.equal(david.averagePoints, 3);
     assert.equal(david.wins, 0);
     const alice = playerStats("alice", [round1, round2]);
     assert.equal(alice.roundsParticipated, 2);
     assert.equal(alice.averageDistance, 10);
     assert.equal(alice.cumulativeDistance, 20);
+    assert.equal(alice.points, 4);
+    assert.equal(alice.averagePoints, 2);
   });
 
   it("late joiners only accumulate rounds they guessed", () => {
     const david = playerStats("david", [round1, round2]);
     assert.equal(david.roundsParticipated, 1);
     assert.equal(david.cumulativeDistance, 4);
+    assert.equal(david.points, 3);
   });
 
-  it("ranks by lowest average, then total, then more rounds", () => {
+  it("ranks by points, then average, then exacts, then lower total difference", () => {
     const players = [
       { id: "alice", displayName: "Alice" },
       { id: "bob", displayName: "Bob" },
@@ -155,12 +224,13 @@ describe("averages and late joiners", () => {
       { id: "erin", displayName: "Erin" },
     ];
     const ranked = rankPlayers(players, [round1, round2]);
-    assert.equal(ranked[0].displayName, "David");
-    assert.equal(ranked[1].displayName, "Alice");
-    assert.equal(ranked[2].displayName, "Bob");
+    assert.equal(ranked[0].displayName, "Alice");
+    assert.equal(ranked[1].displayName, "Bob");
+    assert.equal(ranked[2].displayName, "David");
+    assert.equal(ranked[3].displayName, "Charlie");
     const erin = ranked.find((r) => r.displayName === "Erin");
     assert.equal(erin.rank, null);
-    assert.equal(erin.averageDistance, null);
+    assert.equal(erin.averagePoints, null);
   });
 });
 
@@ -188,6 +258,9 @@ describe("game mutations", () => {
       "Bob",
     ]);
     assert.equal(round.participants.find((p) => p.displayName === "Charlie").isLoser, true);
+    assert.equal(round.participants.find((p) => p.displayName === "Bob").points, 3);
+    assert.equal(round.participants.find((p) => p.displayName === "Alice").points, 2);
+    assert.equal(round.participants.find((p) => p.displayName === "Charlie").points, 1);
   });
 
   it("rejects guess mutation after reveal", () => {
@@ -226,6 +299,8 @@ describe("game mutations", () => {
     const david = playerStats(game.players.find((p) => p.displayName === "David").id, game.rounds);
     assert.equal(david.roundsParticipated, 1);
     assert.equal(david.averageDistance, 0);
+    assert.equal(david.exactCorrect, 1);
+    assert.ok(david.points > 0);
   });
 
   it("lets any pending player guess next, not list order", () => {
@@ -263,12 +338,47 @@ describe("game mutations", () => {
     assert.equal(removePlayer(game, game.players[0].id).ok, false);
   });
 
-  it("cannot remove a player while guesses are open", () => {
+  it("can add a player while guesses are open so they can guess this round", () => {
     const game = createGame(["Alice", "Bob"]);
     startRound(game);
     setObject(game, "Mug", "grams");
-    const r = removePlayer(game, game.players[0].id);
-    assert.equal(r.ok, false);
+    playGuess(game, 10, "Alice");
+    assert.equal(addPlayer(game, "David").ok, true);
+    const david = game.players.find((p) => p.displayName === "David");
+    assert.ok(game.currentRound.guessOrder.includes(david.id));
+    playGuess(game, 11, "David");
+    playGuess(game, 12, "Bob");
+    const revealed = revealRound(game, 11);
+    assert.equal(revealed.ok, true);
+    assert.ok(revealed.round.participants.some((p) => p.displayName === "David"));
+  });
+
+  it("discards a removed player's guess from the current round", () => {
+    const game = createGame(["Alice", "Bob", "Charlie"]);
+    startRound(game);
+    setObject(game, "Mug", "grams");
+    playGuess(game, 10, "Alice");
+    const alice = game.players.find((p) => p.displayName === "Alice");
+    assert.equal(removePlayer(game, alice.id).ok, true);
+    assert.equal(game.currentRound.guesses.some((g) => g.playerId === alice.id), false);
+    playGuess(game, 12, "Bob");
+    playGuess(game, 9, "Charlie");
+    const revealed = revealRound(game, 11);
+    assert.equal(revealed.round.participants.length, 2);
+    assert.ok(!revealed.round.participants.some((p) => p.displayName === "Alice"));
+  });
+
+  it("reopens guessing when a player is added after everyone has guessed", () => {
+    const game = createGame(["Alice", "Bob"]);
+    startRound(game);
+    setObject(game, "Mug", "grams");
+    playGuess(game, 10, "Alice");
+    playGuess(game, 12, "Bob");
+    assert.equal(game.currentRound.status, "actual");
+    assert.equal(addPlayer(game, "David").ok, true);
+    assert.equal(game.currentRound.status, "guessing");
+    playGuess(game, 11, "David");
+    assert.equal(revealRound(game, 11).ok, true);
   });
 
   it("duplicate names are rejected case-insensitively", () => {
