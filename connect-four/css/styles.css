@@ -1,0 +1,209 @@
+/* Connect 4 — board and discs. The shell comes from ../shared/duel.css. */
+
+:root {
+  /* 7x6 grid of 100-unit cells plus a 22-unit frame: 744 x 644. */
+  --board-ar: 1.15528;
+  --rim-dark: rgba(0, 0, 0, 0.62);
+  --rim-mid: rgba(0, 0, 0, 0.12);
+  --rim-light: rgba(255, 222, 176, 0.32);
+  --edge-light: rgba(255, 230, 190, 0.35);
+}
+
+/* Tabletop: the board turns sideways so gravity runs across the screen. */
+html[data-tabletop="on"] {
+  --board-ar: 0.86559;
+}
+
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"] {
+    --rim-dark: rgba(70, 35, 8, 0.55);
+    --rim-mid: rgba(70, 35, 8, 0.08);
+    --rim-light: rgba(255, 250, 235, 0.85);
+    --edge-light: rgba(255, 255, 255, 0.65);
+  }
+}
+
+html[data-theme="light"] {
+  --rim-dark: rgba(70, 35, 8, 0.55);
+  --rim-mid: rgba(70, 35, 8, 0.08);
+  --rim-light: rgba(255, 250, 235, 0.85);
+  --edge-light: rgba(255, 255, 255, 0.65);
+}
+
+.board-wrap.c4 {
+  container-type: size;
+}
+
+.c4-rot {
+  position: absolute;
+  inset: 0;
+}
+
+html[data-tabletop="on"] .c4-rot {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.c4-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 4.57% / 5.28%;
+  background: var(--wood-lo);
+  box-shadow:
+    0 0 0 1px var(--wood-edge),
+    0 7px 0 var(--wood-edge),
+    0 28px 52px rgba(0, 0, 0, 0.42);
+}
+
+.c4-well {
+  position: absolute;
+  inset: 2.4% 2.2%;
+  border-radius: 3%;
+  background: radial-gradient(120% 90% at 50% 15%, var(--well-hi), var(--well-lo));
+}
+
+.c4-pieces,
+.c4-rims,
+.c4-wins {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.c4-face {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.c4-colglow {
+  fill: rgba(255, 236, 205, 0.1);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.c4-colglow.is-on {
+  opacity: 1;
+}
+
+.c4-colglow.is-denied {
+  fill: rgba(208, 84, 63, 0.4);
+  opacity: 1;
+  animation: c4-deny 0.42s ease;
+}
+
+.c4-ghost {
+  opacity: 0.42;
+}
+
+.disc {
+  transition: opacity 0.45s ease;
+}
+
+.c4.is-won .disc:not(.is-win) {
+  opacity: 0.4;
+}
+
+.c4.is-draw .disc {
+  opacity: 0.8;
+}
+
+.c4-wins {
+  filter: drop-shadow(0 0 5px var(--wc-glow, transparent)) drop-shadow(0 0 14px var(--wc-glow, transparent));
+}
+
+.win-ring {
+  fill: none;
+  stroke: #fff2d2;
+  stroke-width: 5;
+  animation:
+    c4-ring-in 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) calc(var(--i) * 70ms) both,
+    c4-ring 1.2s ease-in-out calc(0.45s + var(--i) * 70ms) infinite;
+}
+
+.win-glint {
+  animation: c4-glint 1.2s ease-in-out calc(var(--i) * 70ms) infinite both;
+}
+
+.c4-hit {
+  position: absolute;
+  inset: 0 2.957%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.c4-col {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.c4-col[aria-disabled="true"] {
+  cursor: default;
+}
+
+.c4-col:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: -5px;
+}
+
+@keyframes c4-ring-in {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes c4-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    stroke-opacity: 1;
+  }
+  50% {
+    transform: scale(1.07);
+    stroke-opacity: 0.7;
+  }
+}
+
+@keyframes c4-glint {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes c4-deny {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}
