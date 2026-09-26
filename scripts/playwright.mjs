@@ -26,15 +26,25 @@ async function loadPlaywright() {
 }
 
 // Uses Playwright's own Chromium when installed, otherwise a local Google Chrome.
-export async function launchChromium() {
+async function withChromeFallback(launch) {
   const { chromium } = await loadPlaywright();
   try {
-    return await chromium.launch();
+    return await launch(chromium, {});
   } catch (bundledError) {
     try {
-      return await chromium.launch({ channel: "chrome" });
+      return await launch(chromium, { channel: "chrome" });
     } catch {
       throw bundledError;
     }
   }
+}
+
+export function launchChromium(options = {}) {
+  return withChromeFallback((chromium, extra) => chromium.launch({ ...options, ...extra }));
+}
+
+export function launchPersistentChromium(userDataDir, options = {}) {
+  return withChromeFallback((chromium, extra) =>
+    chromium.launchPersistentContext(userDataDir, { ...options, ...extra }),
+  );
 }
