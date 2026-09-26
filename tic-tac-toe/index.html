@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" data-theme="system" data-tabletop="off">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a1410" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Tic-tac-toe</title>
+    <meta
+      name="description"
+      content="Two players, one device. Classic tic-tac-toe with a running match score, undo and a tabletop mode."
+    />
+    <script>
+      try {
+        var s = JSON.parse(localStorage.getItem("playground.duel.settings") || "{}");
+        document.documentElement.dataset.theme = s.theme || "system";
+        document.documentElement.dataset.tabletop = s.tabletop ? "on" : "off";
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../shared/duel.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div id="app" data-screen="setup"></div>
+    <noscript>Tic-tac-toe needs JavaScript to run.</noscript>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

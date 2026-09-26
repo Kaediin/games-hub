@@ -1,0 +1,307 @@
+/* Tic-tac-toe — board and marks. The shell comes from ../shared/duel.css. */
+
+:root {
+  --board-ar: 1;
+}
+
+.ttt-board {
+  position: absolute;
+  inset: 0;
+  border-radius: 9%;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 236, 205, 0.18),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.22),
+    0 0 0 1px var(--wood-edge),
+    0 6px 0 var(--wood-edge),
+    0 26px 50px rgba(0, 0, 0, 0.42);
+}
+
+.ttt-inner {
+  position: absolute;
+  inset: 6%;
+}
+
+.ttt-grid,
+.ttt-strike {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.gv-dark,
+.gv-light {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+}
+
+.gv-dark {
+  stroke: var(--groove-dark);
+  stroke-width: 5.5;
+}
+
+.gv-light {
+  stroke: var(--groove-light);
+  stroke-width: 1.8;
+}
+
+#app.is-ready .ttt-grid path {
+  animation: ttt-draw 0.7s cubic-bezier(0.6, 0.1, 0.3, 1) both;
+}
+
+#app.is-ready .ttt-grid path:nth-child(n + 3) {
+  animation-delay: 0.12s;
+}
+
+#app.is-ready .ttt-grid path:nth-child(n + 5) {
+  animation-delay: 0.24s;
+}
+
+#app.is-ready .ttt-grid path:nth-child(n + 7) {
+  animation-delay: 0.36s;
+}
+
+.ttt-cells {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template: repeat(3, minmax(0, 1fr)) / repeat(3, minmax(0, 1fr));
+}
+
+.ttt-cell {
+  position: relative;
+  margin: 3%;
+  padding: 0;
+  border: 0;
+  border-radius: 18%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color 0.18s ease;
+}
+
+.ttt-cell[aria-disabled="true"] {
+  cursor: default;
+}
+
+.ttt-cell:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: -3px;
+}
+
+.ttt-cell:active:not(.is-filled) {
+  background: rgba(255, 236, 205, 0.1);
+}
+
+.ttt-cell svg {
+  position: absolute;
+  inset: 9%;
+  width: 82%;
+  height: 82%;
+  overflow: visible;
+}
+
+/* ---------- marks ---------- */
+
+.ttt-piece path,
+.ttt-mark path,
+.ttt-ghost path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ly-shadow {
+  stroke: rgba(20, 8, 0, 0.34);
+  stroke-width: 13;
+}
+
+.ly-body {
+  stroke-width: 12;
+}
+
+.ly-shine {
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 3.2;
+}
+
+.ttt-piece .ly-shadow {
+  stroke-width: 15;
+}
+
+.ttt-piece .ly-body {
+  stroke-width: 14;
+}
+
+.ttt-piece .ly-shine {
+  stroke-width: 3.6;
+}
+
+.ttt-mark path {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+}
+
+.ttt-mark.is-drawing path {
+  animation: ttt-draw 0.22s cubic-bezier(0.55, 0.1, 0.35, 1) both;
+}
+
+.ttt-mark.is-drawing .st-x1 path {
+  animation-delay: 0.15s;
+}
+
+.ttt-mark.is-drawing .st-o path {
+  animation-duration: 0.38s;
+}
+
+.ttt-mark {
+  transform-origin: 50% 50%;
+}
+
+.ttt-mark.is-drawing {
+  animation: ttt-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+.ttt-mark.is-leaving {
+  animation: ttt-leave 0.24s ease-in both;
+}
+
+.ttt-ghost .gh {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.ttt-ghost path {
+  stroke-width: 10;
+}
+
+.ttt-ghost .gh-0 path {
+  stroke: var(--p0);
+}
+
+.ttt-ghost .gh-1 path {
+  stroke: var(--p1);
+}
+
+@media (hover: hover) {
+  .ttt-cell:not(.is-filled):not([aria-disabled="true"]):hover {
+    background: rgba(255, 236, 205, 0.07);
+  }
+
+  .ttt[data-turn="0"] .ttt-cell:not(.is-filled):hover .gh-0,
+  .ttt[data-turn="1"] .ttt-cell:not(.is-filled):hover .gh-1 {
+    opacity: 0.3;
+  }
+}
+
+.ttt-cell.is-filled .ttt-ghost {
+  display: none;
+}
+
+/* ---------- round end ---------- */
+
+.ttt.is-over .ttt-cell:not(.is-win) .ttt-mark:not(.is-leaving) {
+  opacity: 0.32;
+  filter: saturate(0.55);
+  transition: opacity 0.4s ease var(--win-delay, 0ms), filter 0.4s ease var(--win-delay, 0ms);
+}
+
+.ttt.is-draw .ttt-cell .ttt-mark:not(.is-leaving) {
+  opacity: 0.7;
+  filter: none;
+}
+
+.ttt-cell.is-win .ttt-mark:not(.is-drawing) {
+  animation: ttt-pulse 1.3s ease-in-out var(--win-delay, 0ms) infinite;
+}
+
+.ttt-cell.is-win .ttt-mark.is-drawing {
+  animation:
+    ttt-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1) both,
+    ttt-pulse 1.3s ease-in-out var(--win-delay, 0ms) infinite;
+}
+
+.ttt-strike {
+  opacity: 0;
+  filter: drop-shadow(0 0 10px var(--wc-glow, transparent));
+}
+
+.ttt-strike.is-on {
+  opacity: 1;
+}
+
+.ttt-strike.is-leaving {
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+.ttt-strike path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+}
+
+.sk-shadow {
+  stroke: rgba(20, 8, 0, 0.3);
+  stroke-width: 15;
+}
+
+.sk-line {
+  stroke: var(--wc, var(--amber));
+  stroke-width: 11;
+}
+
+.sk-core {
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 3;
+}
+
+.ttt-strike.is-drawing path {
+  animation: ttt-draw 0.45s cubic-bezier(0.6, 0.05, 0.3, 1) var(--win-delay, 0ms) both;
+}
+
+@keyframes ttt-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes ttt-pop {
+  0% {
+    transform: scale(0.82);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ttt-leave {
+  to {
+    opacity: 0;
+    transform: scale(0.6) rotate(-12deg);
+  }
+}
+
+@keyframes ttt-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.09);
+  }
+}
