@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="26%" r="82%">
+      <stop offset="0" stop-color="#4d3520"/>
+      <stop offset="0.46" stop-color="#2a1d12"/>
+      <stop offset="1" stop-color="#110c08"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="14%" r="58%">
+      <stop offset="0" stop-color="#e8b86d" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#e8b86d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bulb" cx="40%" cy="34%" r="70%">
+      <stop offset="0" stop-color="#fff6dc"/>
+      <stop offset="0.45" stop-color="#f3cf8a"/>
+      <stop offset="1" stop-color="#d4903c"/>
+    </radialGradient>
+    <radialGradient id="halo">
+      <stop offset="0" stop-color="#f0c47e" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#f0c47e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#58442f"/>
+      <stop offset="1" stop-color="#2c2117"/>
+    </linearGradient>
+    <radialGradient id="well" cx="50%" cy="38%" r="70%">
+      <stop offset="0" stop-color="#1f1710"/>
+      <stop offset="1" stop-color="#0f0b08"/>
+    </radialGradient>
+    <radialGradient id="cap-amber" cx="38%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#fbe2b0"/>
+      <stop offset="0.5" stop-color="#e8b86d"/>
+      <stop offset="1" stop-color="#bf8436"/>
+    </radialGradient>
+    <radialGradient id="cap-red" cx="38%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#f39a7c"/>
+      <stop offset="0.5" stop-color="#e4572e"/>
+      <stop offset="1" stop-color="#a93a1c"/>
+    </radialGradient>
+    <radialGradient id="cap-teal" cx="38%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#94d0bf"/>
+      <stop offset="0.5" stop-color="#4a8b7a"/>
+      <stop offset="1" stop-color="#2f6254"/>
+    </radialGradient>
+    <radialGradient id="cap-blue" cx="38%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#9dc1ea"/>
+      <stop offset="0.5" stop-color="#4a82c4"/>
+      <stop offset="1" stop-color="#2f5b90"/>
+    </radialGradient>
+    <g id="gloss">
+      <ellipse cx="-12" cy="-17" rx="17" ry="10" fill="#fff" fill-opacity="0.42" transform="rotate(-24 -12 -17)"/>
+    </g>
+    <g id="lamp">
+      <circle r="22" fill="url(#halo)"/>
+      <circle r="10.5" fill="url(#bulb)"/>
+    </g>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+
+  <g id="art">
+    <g id="marquee">
+      <use href="#lamp" x="256" y="50"/>
+      <use href="#lamp" x="319.7" y="60.1" opacity="0.55"/>
+      <use href="#lamp" x="377.1" y="89.3"/>
+      <use href="#lamp" x="422.7" y="134.9" opacity="0.55"/>
+      <use href="#lamp" x="451.9" y="192.3"/>
+      <use href="#lamp" x="462" y="256" opacity="0.55"/>
+      <use href="#lamp" x="451.9" y="319.7"/>
+      <use href="#lamp" x="422.7" y="377.1" opacity="0.55"/>
+      <use href="#lamp" x="377.1" y="422.7"/>
+      <use href="#lamp" x="319.7" y="451.9" opacity="0.55"/>
+      <use href="#lamp" x="256" y="462"/>
+      <use href="#lamp" x="192.3" y="451.9" opacity="0.55"/>
+      <use href="#lamp" x="134.9" y="422.7"/>
+      <use href="#lamp" x="89.3" y="377.1" opacity="0.55"/>
+      <use href="#lamp" x="60.1" y="319.7"/>
+      <use href="#lamp" x="50" y="256" opacity="0.55"/>
+      <use href="#lamp" x="60.1" y="192.3"/>
+      <use href="#lamp" x="89.3" y="134.9" opacity="0.55"/>
+      <use href="#lamp" x="134.9" y="89.3"/>
+      <use href="#lamp" x="192.3" y="60.1" opacity="0.55"/>
+    </g>
+
+    <circle cx="256" cy="256" r="170" fill="url(#wood)" stroke="#6e5639" stroke-width="4"/>
+    <circle cx="256" cy="256" r="163" fill="none" stroke="#ffdca0" stroke-opacity="0.16" stroke-width="2"/>
+    <circle cx="256" cy="256" r="144" fill="url(#well)"/>
+    <circle cx="256" cy="256" r="144" fill="none" stroke="#ffdca0" stroke-opacity="0.12" stroke-width="2"/>
+
+    <g id="buttons">
+      <g transform="translate(256 182)">
+        <circle cy="11" r="41" fill="#000" fill-opacity="0.45"/>
+        <circle cy="7" r="40" fill="#7f531f"/>
+        <circle r="40" fill="url(#cap-amber)"/>
+        <use href="#gloss"/>
+      </g>
+      <g transform="translate(330 256)">
+        <circle cy="11" r="41" fill="#000" fill-opacity="0.45"/>
+        <circle cy="7" r="40" fill="#72260f"/>
+        <circle r="40" fill="url(#cap-red)"/>
+        <use href="#gloss"/>
+      </g>
+      <g transform="translate(256 330)">
+        <circle cy="11" r="41" fill="#000" fill-opacity="0.45"/>
+        <circle cy="7" r="40" fill="#1f4238"/>
+        <circle r="40" fill="url(#cap-teal)"/>
+        <use href="#gloss"/>
+      </g>
+      <g transform="translate(182 256)">
+        <circle cy="11" r="41" fill="#000" fill-opacity="0.45"/>
+        <circle cy="7" r="40" fill="#1f3c62"/>
+        <circle r="40" fill="url(#cap-blue)"/>
+        <use href="#gloss"/>
+      </g>
+    </g>
+  </g>
+</svg>
