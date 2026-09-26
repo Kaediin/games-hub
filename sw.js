@@ -5,7 +5,7 @@
 // `node scripts/gen-precache.mjs`. Do not edit it by hand.
 
 // <precache>
-const PRECACHE_VERSION = "141bfe18ea20";
+const PRECACHE_VERSION = "0bb1e3762587";
 const PRECACHE_URLS = [
   "close-enough/css/styles.css",
   "close-enough/index.html",

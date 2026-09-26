@@ -320,6 +320,7 @@ export function startDuel(game) {
     els.panels.forEach((panel, seat) => {
       const num = panel.querySelector(".panel-score-num");
       num.textContent = String(shownWins[seat]);
+      panel.querySelector(".panel-score-label").textContent = shownWins[seat] === 1 ? "win" : "wins";
       if (seat === bumpSeat) {
         num.classList.remove("is-bump");
         void num.offsetWidth;
