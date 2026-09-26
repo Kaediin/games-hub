@@ -13,6 +13,13 @@
       name="description"
       content="Two players, one device. Classic 7x6 Connect 4 with a running match score, undo and a tabletop mode."
     />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="../icons/icon-180.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Playground" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script type="module" src="../js/pwa.js"></script>
     <script>
       try {
         var s = JSON.parse(localStorage.getItem("playground.duel.settings") || "{}");
