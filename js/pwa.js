@@ -16,7 +16,10 @@ if ("serviceWorker" in navigator) {
   sw.addEventListener("controllerchange", () => {
     const replaced = controller !== null;
     controller = sw.controller;
-    if (!replaced) return;
+    if (!replaced) {
+      cacheFontsInUse();
+      return;
+    }
     updated = true;
     if (document.visibilityState === "hidden") location.reload();
   });
@@ -41,4 +44,34 @@ if ("serviceWorker" in navigator) {
 
   if (document.readyState === "complete") register();
   else window.addEventListener("load", register, { once: true });
+}
+
+// A page that loaded before the service worker controlled it fetched its Google
+// Fonts past the worker. Fetch them again through it so they work offline: each
+// stylesheet, then its Latin font files, the subset these pages render. Pages
+// can't see which font files the browser picked, so the CSS is read instead.
+async function cacheFontsInUse() {
+  const sheets = document.querySelectorAll(
+    'link[rel="stylesheet"][href^="https://fonts.googleapis.com/"]',
+  );
+  for (const { href } of sheets) {
+    try {
+      const css = await (await fetch(href, { mode: "cors" })).text();
+      const files = new Set();
+      for (const [, rules] of css.matchAll(/@font-face\s*{([^}]*)}/g)) {
+        const src = rules.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/)?.[1];
+        if (src && coversLatin(rules)) files.add(src);
+      }
+      await Promise.all([...files].map((src) => fetch(src).catch(() => {})));
+    } catch {}
+  }
+}
+
+function coversLatin(rules) {
+  const ranges = rules.match(/unicode-range:\s*([^;]+)/)?.[1];
+  if (!ranges) return true;
+  return ranges.split(",").some((range) => {
+    const [start, end = start] = range.trim().replace(/^U\+/i, "").split("-");
+    return parseInt(start, 16) <= 0x41 && parseInt(end, 16) >= 0x41;
+  });
 }
