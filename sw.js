@@ -5,7 +5,7 @@
 // `node scripts/gen-precache.mjs`. Do not edit it by hand.
 
 // <precache>
-const PRECACHE_VERSION = "7239da9822e6";
+const PRECACHE_VERSION = "0bb1e3762587";
 const PRECACHE_URLS = [
   "close-enough/css/styles.css",
   "close-enough/index.html",
@@ -48,6 +48,10 @@ const PRECACHE_URLS = [
   "codenames/js/views/setup.js",
   "codenames/js/words.js",
   "codenames/vendor/qrcode.min.js",
+  "connect-four/css/styles.css",
+  "connect-four/index.html",
+  "connect-four/js/game.js",
+  "connect-four/js/main.js",
   "css/hub.css",
   "icons/icon-180.png",
   "icons/icon-192.png",
@@ -59,6 +63,16 @@ const PRECACHE_URLS = [
   "js/hub.js",
   "js/pwa.js",
   "manifest.webmanifest",
+  "shared/confetti.js",
+  "shared/duel.css",
+  "shared/duel.js",
+  "shared/haptics.js",
+  "shared/match.js",
+  "shared/players.js",
+  "shared/session.js",
+  "shared/sound.js",
+  "shared/store.js",
+  "shared/theme.js",
   "thirty-seconds/css/styles.css",
   "thirty-seconds/index.html",
   "thirty-seconds/js/boardMap.js",
@@ -82,7 +96,11 @@ const PRECACHE_URLS = [
   "thirty-seconds/js/words/movies.js",
   "thirty-seconds/js/words/music.js",
   "thirty-seconds/js/words/nl_general.js",
-  "thirty-seconds/js/words/sports.js"
+  "thirty-seconds/js/words/sports.js",
+  "tic-tac-toe/css/styles.css",
+  "tic-tac-toe/index.html",
+  "tic-tac-toe/js/game.js",
+  "tic-tac-toe/js/main.js"
 ];
 // </precache>
 
